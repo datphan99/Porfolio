@@ -22,7 +22,6 @@ const ProjectsSection = () => {
       className={cn(
         "h-[calc(100dvh-3rem)] md:h-[calc(100dvh-4rem)] z-[2]",
         "col-span-1",
-        "flex flex-col justify-start md:justify-center items-center md:items-start",
         "pt-28 sm:pt-0 sm:pb-32 md:p-24 lg:p-40 xl:p-48"
       )}
     >
@@ -37,7 +36,7 @@ const ProjectsSection = () => {
           Projects
         </h2>
       </Link>
-      <div className="grid grid-cols-1 md:grid-cols-3">
+      <div className="grid grid-cols-1  md:grid-cols-3">
         {projects.map((project, index) => (
           <Modall key={project.src} project={project} />
         ))}
