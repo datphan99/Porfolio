@@ -14,7 +14,10 @@ import { cn } from "@/lib/utils";
 import { config } from "@/data/config";
 const ContactSection = () => {
   return (
-    <section id="contact" className="min-h-screen max-w-7xl mx-auto ">
+    <section
+      id="contact"
+      className="min-h-screen max-w-7xl mx-auto px-4 xl:px-0 "
+    >
       <Link href={"#contact"}>
         <h2
           className={cn(

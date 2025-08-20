@@ -191,7 +191,7 @@ function ElasticCursor() {
   // Return UI
   return (
     <>
-      {/* <div
+      <div
         ref={jellyRef}
         id={"jelly-id"}
         className={cn(
@@ -211,7 +211,7 @@ function ElasticCursor() {
           left: x,
           backdropFilter: "invert(100%)",
         }}
-      ></div> */}
+      ></div>
     </>
   );
 }

@@ -17,14 +17,7 @@ import { cn } from "@/lib/utils";
 
 const ProjectsSection = () => {
   return (
-    <section
-      id="projects"
-      className={cn(
-        "h-[calc(100dvh-3rem)] md:h-[calc(100dvh-4rem)] z-[2]",
-        "col-span-1",
-        "pt-28 sm:pt-0 sm:pb-32 md:p-24 lg:p-40 xl:p-48"
-      )}
-    >
+    <section id="projects" className="min-h-screen max-w-7xl mx-auto">
       <Link href={"#projects"}>
         <h2
           className={cn(
