@@ -212,7 +212,6 @@ function ElasticCursor() {
           backdropFilter: "invert(100%)",
         }}
       ></div> */}
-      p1
     </>
   );
 }
