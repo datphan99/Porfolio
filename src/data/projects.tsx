@@ -378,8 +378,7 @@ const projects: Project[] = [
     title: "My Portfolio",
     src: "/assets/projects-screenshots/portfolio/landing.png",
     screenshots: ["assets/projects-screenshots/portfolio/landing.png"],
-    live: "https://www.abhijitzende.com/",
-    github: "https://github.com/Abhiz2411/3D-interactive-portfolio",
+    live: "https://tuyendat09.vercel.app/",
     skills: {
       frontend: [
         PROJECT_SKILLS.ts,
@@ -459,7 +458,6 @@ const projects: Project[] = [
             cat lovers flood the feed with whiskers, toe beans, and way too many
             “aww” moments.
           </TypographyP>
-          <ProjectsLinks live={this.live} repo={this.github} />
           <TypographyH3>Animated gatekeeper (built with GSAP!)</TypographyH3>
           <TypographyP className="font-mono">
             With all my passion (and probably too much coffee), this might be

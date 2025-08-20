@@ -2,7 +2,6 @@
 import { useDevToolsOpen } from "@/hooks/use-devtools-open";
 import React, { useEffect, useState } from "react";
 import NyanCat from "./nyan-cat";
-import { AnimatePresence } from "framer-motion";
 
 const EasterEggs = () => {
   const { isDevToolsOpen } = useDevToolsOpen();
@@ -30,7 +29,7 @@ const EasterEggs = () => {
         "color: #FFD700; font-size: 16px; font-weight: bold; background-color: black; padding: 10px; border-radius: 10px;"
       );
 
-      ["naresh", "Naresh", "NARESH"].forEach((name) => {
+      ["dat", "Dat", "DAT"].forEach((name) => {
         // @ts-ignore
         if (Object.hasOwn(window, name)) return;
         Object.defineProperty(window, name, {
