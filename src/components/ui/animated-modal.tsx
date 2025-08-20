@@ -166,7 +166,7 @@ export const ModalFooter = ({
   children,
   className,
 }: {
-  children: ReactNode;
+  children?: ReactNode;
   className?: string;
 }) => {
   const { setOpen } = useModal();
