@@ -14,11 +14,12 @@ import Link from "next/link";
 import SmoothScroll from "../smooth-scroll";
 import projects, { Project } from "@/data/projects";
 import { cn } from "@/lib/utils";
+import { about } from "@/data/about";
 
-const ProjectsSection = () => {
+const AboutSection = () => {
   return (
     <section
-      id="projects"
+      id="about"
       className={cn(
         "h-[calc(100dvh-3rem)] md:h-[calc(100dvh-4rem)] z-[2]",
         "col-span-1",
@@ -26,7 +27,7 @@ const ProjectsSection = () => {
         "pt-28 sm:pt-0 sm:pb-32 md:p-24 lg:p-40 xl:p-48"
       )}
     >
-      <Link href={"#projects"}>
+      <Link href={"#about"}>
         <h2
           className={cn(
             "bg-clip-text text-4xl text-center text-transparent md:text-7xl pt-16",
@@ -34,14 +35,27 @@ const ProjectsSection = () => {
             "dark:bg-gradient-to-b dark:from-white/80 dark:to-white/20 dark:bg-opacity-50 mb-32"
           )}
         >
-          Projects
+          About
         </h2>
       </Link>
-      <div className="grid grid-cols-1 md:grid-cols-3">
-        {projects.map((project, index) => (
-          <Modall key={project.src} project={project} />
+      <ul className="border-l border-gray-400 list-none ml-2  ">
+        {about.map((item) => (
+          <li key={item.id} className="relative">
+            <div className=" bg-white size-4 rounded-full -left-2 absolute" />
+            <div className="border border-gray-400 rounded ml-6 p-4 max-w-[450px] font-sans relative ">
+              <h2 className="text-base font-semibold">{item.date}</h2>
+              <div>
+                <h1 className="text-base font-bold inline-block">
+                  {item.workPlace}
+                  <span className="mx-2">-</span>
+                  <p className="inline-block"> {item.position}</p>
+                </h1>
+              </div>
+              <p className="text-gray-500">{item.description}</p>
+            </div>
+          </li>
         ))}
-      </div>
+      </ul>
     </section>
   );
 };
@@ -83,7 +97,7 @@ const Modall = ({ project }: { project: Project }) => {
     </div>
   );
 };
-export default ProjectsSection;
+export default AboutSection;
 
 const ProjectContents = ({ project }: { project: Project }) => {
   return (
