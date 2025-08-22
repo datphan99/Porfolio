@@ -46,10 +46,12 @@ function Preloader({ children, disabled = false }: PreloaderProps) {
     loadingTween.current?.progress(0.99).kill();
     setLoadingPercent(100);
     setIsLoading(false);
-    // console.log("killed", loadingTween.current);
   };
+
   const loadingPercentRef = useRef<{ value: number }>({ value: 0 });
   useEffect(() => {
+    window.scrollTo(0, 0);
+
     loadingTween.current = gsap.to(loadingPercentRef.current, {
       value: 100,
       duration: LOADING_TIME,
