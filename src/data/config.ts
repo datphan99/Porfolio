@@ -25,7 +25,7 @@ const config = {
     "AWS",
   ],
   author: "Dat Phan",
-  email: "tuyendat2421@gmail.com",
+  email: "phantuyendat.work@gmaill.com",
   site: "httops://abhijitzende.cm",
 
   get ogImg() {
