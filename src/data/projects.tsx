@@ -41,7 +41,7 @@ import { TbBrandFramerMotion } from "react-icons/tb";
 import css from "styled-jsx/css";
 const BASE_PATH = "/assets/projects-screenshots";
 
-const ProjectsLinks = ({ live, repo }: { live: string; repo?: string }) => {
+const ProjectsLinks = ({ live, repo }: { live?: string; repo?: string }) => {
   return (
     <div className="flex flex-col md:flex-row items-center justify-start gap-3 my-3 mb-8">
       {repo && (
@@ -53,6 +53,19 @@ const ProjectsLinks = ({ live, repo }: { live: string; repo?: string }) => {
         >
           <Button variant={"default"} size={"sm"}>
             Github
+            <ArrowUpRight className="ml-3 w-5 h-5" />
+          </Button>
+        </Link>
+      )}
+      {live && (
+        <Link
+          className="font-mono underline flex gap-2"
+          rel="noopener"
+          target="_new"
+          href={live}
+        >
+          <Button variant={"default"} size={"sm"}>
+            Live
             <ArrowUpRight className="ml-3 w-5 h-5" />
           </Button>
         </Link>
@@ -311,7 +324,7 @@ const projects: Project[] = [
     title: "PETZ - Services & Products",
     src: "/assets/projects-screenshots/petz/thumbnail.png",
     screenshots: ["1.png", "2.png", "3.png"],
-    live: "https://ai-docker-file-optimizer.netlify.app/",
+    live: "https://petz-client.vercel.app/",
     github: "https://github.com/tuyendat09/PETZ-Product-Services",
     skills: {
       frontend: [
@@ -458,6 +471,7 @@ const projects: Project[] = [
             cat lovers flood the feed with whiskers, toe beans, and way too many
             “aww” moments.
           </TypographyP>
+          <ProjectsLinks repo={this.github} />
           <TypographyH3>Animated gatekeeper (built with GSAP!)</TypographyH3>
           <TypographyP className="font-mono">
             With all my passion (and probably too much coffee), this might be
