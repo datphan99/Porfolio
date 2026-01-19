@@ -38,7 +38,7 @@ const AboutSection = () => {
           About
         </h2>
       </Link>
-      <ul className="border-l border-gray-400 list-none ml-2  ">
+      <ul className="border-l border-gray-400 list-none ml-2 space-y-4  ">
         {about.map((item) => (
           <li key={item.id} className="relative">
             <div className=" bg-white size-4 rounded-full -left-2 absolute" />
