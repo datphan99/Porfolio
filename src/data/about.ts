@@ -11,7 +11,7 @@ export const about: About[] = [
     id: "PHS",
     workPlace: "Phu Hung Securities",
     position: "Frontend Developer ",
-    date: "Sep 2025 - Jul 2026",
+    date: "Sep 2025 - Jan 2026",
     description:
       "Modernized a legacy internal dashboard using Nuxt.js by improving UI/UX, optimizing first-page rendering with SSR data hydration, and refactoring reusable components to enhance performance and maintainability",
   },
