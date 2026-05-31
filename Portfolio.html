@@ -1,0 +1,1028 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Nikola — Portfolio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  /* ───────────── Base ───────────── */
+  *, *::before, *::after { box-sizing: border-box; }
+  :root{
+    --bg: #efece6;
+    --bg-2: #e8e5df;
+    --ink: #111;
+    --ink-soft: #4a4a48;
+    --muted: #8b8a86;
+    --card: #ffffff;
+    --line: rgba(0,0,0,.08);
+    --dark: #0d0d0d;
+    --dot: #ff5a3c;
+    --radius: 22px;
+  }
+  html, body { margin: 0; }
+  body {
+    font-family: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    color: var(--ink);
+    background: #D9D9D9;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  img { max-width: 100%; display: block; }
+  a { color: inherit; text-decoration: none; }
+  ul { margin: 0; padding: 0; list-style: none; }
+  h1, h2, h3, h4, p { margin: 0; }
+  button { font: inherit; cursor: pointer; border: 0; background: transparent; color: inherit; }
+
+  .container { max-width: 1180px; margin: 0 auto; padding: 0 28px; }
+  .eyebrow {
+    display: inline-block;
+    font-size: 12px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  section { padding: 120px 0; }
+
+  /* ───────────── Nav ───────────── */
+  .site-nav { position: relative; z-index: 60; padding: 28px 0 0; }
+  .site-nav nav {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+  }
+  .brand { font-weight: 600; letter-spacing: -.01em; font-size: 18px; }
+
+  /* hamburger button — two bars that cross into an X */
+  .nav-burger {
+    position: relative;
+    z-index: 80;
+    width: 54px; height: 54px;
+    border-radius: 50%;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    cursor: pointer;
+    box-shadow: 0 6px 20px -8px rgba(0,0,0,.25);
+    transition: transform .2s;
+  }
+  .nav-burger:hover { transform: scale(1.05); }
+  .nav-burger span {
+    width: 22px; height: 2px;
+    background: var(--ink);
+    border-radius: 2px;
+    transition: transform .35s cubic-bezier(.22,1,.36,1);
+  }
+  /* checked → cross into X (gap 6 + height 2 → center offset 4px) */
+  .nav-toggle:checked ~ .nav-burger span:nth-child(1) { transform: translateY(4px) rotate(45deg); }
+  .nav-toggle:checked ~ .nav-burger span:nth-child(2) { transform: translateY(-4px) rotate(-45deg); }
+
+  /* scrim behind panel */
+  .nav-scrim {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    background: rgba(0,0,0,0);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity .3s, visibility .3s;
+    cursor: pointer;
+  }
+
+  /* panel — drops in just below the burger, fades in */
+  .nav-panel {
+    position: absolute;
+    top: calc(100% + 16px);
+    right: 0;
+    z-index: 70;
+    width: min(380px, calc(100vw - 48px));
+    background: #fff;
+    border-radius: 28px;
+    padding: 44px 44px 36px;
+    box-shadow: 0 30px 80px -24px rgba(0,0,0,.35);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-6px);
+    transition: opacity .35s ease, transform .35s ease, visibility .35s;
+  }
+
+  /* open state */
+  .nav-toggle:checked ~ .nav-scrim { opacity: 1; visibility: visible; background: rgba(0,0,0,.04); }
+  .nav-toggle:checked ~ .nav-panel { opacity: 1; visibility: visible; transform: translateY(0); }
+
+  .nav-close { display: none; }
+
+  .nav-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .nav-menu li {
+    /* hidden start: faded + nudged left, staggers in when panel opens */
+    opacity: 0;
+    transform: translateX(-14px);
+    transition: opacity .4s ease, transform .45s cubic-bezier(.22,1,.36,1);
+  }
+  .nav-toggle:checked ~ .nav-panel .nav-menu li { opacity: 1; transform: translateX(0); }
+  .nav-toggle:checked ~ .nav-panel .nav-menu li:nth-child(1) { transition-delay: .12s; }
+  .nav-toggle:checked ~ .nav-panel .nav-menu li:nth-child(2) { transition-delay: .18s; }
+  .nav-toggle:checked ~ .nav-panel .nav-menu li:nth-child(3) { transition-delay: .24s; }
+  .nav-toggle:checked ~ .nav-panel .nav-menu li:nth-child(4) { transition-delay: .30s; }
+  .nav-toggle:checked ~ .nav-panel .nav-menu li:nth-child(5) { transition-delay: .36s; }
+  .nav-toggle:checked ~ .nav-panel .nav-menu li:nth-child(6) { transition-delay: .42s; }
+  .nav-menu a {
+    display: block;
+    padding: 8px 0;
+    font-size: 26px;
+    font-weight: 500;
+    letter-spacing: -.02em;
+    color: var(--ink);
+    transition: color .2s, padding-left .2s;
+  }
+  .nav-menu a:hover { color: var(--dot); padding-left: 8px; }
+
+  .nav-socials {
+    display: flex;
+    gap: 14px;
+    margin-top: 32px;
+    padding-top: 28px;
+    border-top: 1px solid var(--line);
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity .4s ease, transform .45s ease;
+  }
+  .nav-toggle:checked ~ .nav-panel .nav-socials { opacity: 1; transform: translateY(0); transition-delay: .48s; }
+  .nav-socials a {
+    width: 50px; height: 50px;
+    border-radius: 50%;
+    border: 1px solid var(--line);
+    display: grid;
+    place-items: center;
+    color: var(--ink-soft);
+    transition: background .2s, color .2s;
+  }
+  .nav-socials a:hover { background: var(--ink); color: #fff; }
+
+  /* ───────────── Pill button (shared) ───────────── */
+  .pill-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--dark);
+    color: #fff;
+    padding: 14px 22px;
+    border-radius: 999px;
+    font-size: 15px;
+    font-weight: 500;
+  }
+  .pill-btn .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--dot);
+    box-shadow: 0 0 0 4px rgba(255,90,60,.18);
+  }
+
+  /* ───────────── Hero ───────────── */
+  .hero {
+    position: relative;
+    padding-top: 80px;
+    padding-bottom: 60px;
+    text-align: center;
+    background: #D9D9D9;
+    overflow: hidden;
+  }
+  .hero > .container { position: relative; z-index: 1; }
+
+  /* skewed light-beam backdrop */
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+    background: linear-gradient(225deg, #fff 0%, #dbdbdb 100%);
+    -webkit-mask: radial-gradient(125% 100% at 0 0, #000 0%, rgba(0,0,0,.22) 88%, transparent 100%);
+    mask: radial-gradient(125% 100% at 0 0, #000 0%, rgba(0,0,0,.22) 88%, transparent 100%);
+  }
+  .hero-beam {
+    position: absolute;
+    top: -20%;
+    height: 140%;
+    max-width: 960px;
+    transform: skewX(45deg);
+    background: linear-gradient(#fff 0% 84%, rgba(255,255,255,0) 100%);
+  }
+  .hero-beam--1 {
+    width: 591px; left: 12%;
+    -webkit-mask: linear-gradient(90deg,#0000 0%,#000 20%,#0000 36%,#000 55%,#00000021 67%,#000 78%,#0000 97%);
+    mask: linear-gradient(90deg,#0000 0%,#000 20%,#0000 36%,#000 55%,#00000021 67%,#000 78%,#0000 97%);
+  }
+  .hero-beam--2 {
+    width: 582px; left: -6%;
+    -webkit-mask: linear-gradient(90deg,#0000 11%,#000 25%,#0000008c 42%,#00000021 67%,#000 78%,#0000 97%);
+    mask: linear-gradient(90deg,#0000 11%,#000 25%,#0000008c 42%,#00000021 67%,#000 78%,#0000 97%);
+  }
+  .hero-beam--3 {
+    width: 441px; left: 30%;
+    -webkit-mask: linear-gradient(90deg,#0000 10%,#000 20%,#0000008c 28%,#0000006c 40%,#000 48%,#0004 54%,#00000021 78%,#000 88%,#0000 97%);
+    mask: linear-gradient(90deg,#0000 10%,#000 20%,#0000008c 28%,#0000006c 40%,#000 48%,#0004 54%,#00000021 78%,#000 88%,#0000 97%);
+  }
+  .hero-beam--4 {
+    width: 684px; left: 48%;
+    -webkit-mask: linear-gradient(90deg,#0000 0%,#000 17%,#0000008c 26%,#000 35%,#0000 47%,#00000021 69%,#000 79%,#0000 97%);
+    mask: linear-gradient(90deg,#0000 0%,#000 17%,#0000008c 26%,#000 35%,#0000 47%,#00000021 69%,#000 79%,#0000 97%);
+  }
+  .hero-beam--5 {
+    width: 426px; left: 66%;
+    -webkit-mask: linear-gradient(90deg,#0000 0%,#000 20%,#0000008c 27%,#000 42%,#0000 48%,#00000021 67%,#000 75% 82%,#00000078 88%,#0000 97%);
+    mask: linear-gradient(90deg,#0000 0%,#000 20%,#0000008c 27%,#000 42%,#0000 48%,#00000021 67%,#000 75% 82%,#00000078 88%,#0000 97%);
+  }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 8px 16px;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    font-size: 13px;
+    color: var(--ink-soft);
+    box-shadow: 0 2px 8px rgba(0,0,0,.04);
+  }
+  .hero-title {
+    margin: 28px auto 24px;
+    max-width: 900px;
+    font-size: clamp(48px, 7.2vw, 104px);
+    font-weight: 600;
+    line-height: 1.02;
+    letter-spacing: -.035em;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 14px 18px;
+  }
+  .hero-inline-img {
+    display: inline-block;
+    width: clamp(80px, 10vw, 140px);
+    height: clamp(48px, 6vw, 80px);
+    border-radius: 14px;
+    overflow: hidden;
+    background: #ddd;
+    box-shadow: 0 6px 18px rgba(0,0,0,.08);
+    vertical-align: middle;
+  }
+  .hero-inline-img img { width: 100%; height: 100%; object-fit: cover; }
+  .hero-sub {
+    max-width: 520px;
+    margin: 0 auto 36px;
+    color: var(--ink-soft);
+    font-size: 16px;
+  }
+  .hero-cta { /* uses .pill-btn pattern via custom rule */
+    display: inline-flex; align-items: center; gap: 10px;
+    background: var(--dark); color: #fff;
+    padding: 14px 22px; border-radius: 999px;
+    font-size: 15px; font-weight: 500;
+  }
+  .hero-cta-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--dot); color: transparent;
+    box-shadow: 0 0 0 4px rgba(255,90,60,.18);
+  }
+
+  /* ───────────── Showcase ───────────── */
+  .showcase { padding-top: 40px; padding-bottom: 80px; }
+  .showcase-frame {
+    position: relative;
+    background: #1a1a1a;
+    border-radius: 28px;
+    padding: 22px;
+    display: grid;
+    gap: 18px;
+    box-shadow: 0 30px 80px -30px rgba(0,0,0,.45);
+  }
+  .showcase-row { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  .showcase-card {
+    position: relative;
+    margin: 0;
+    background: #fff;
+    border-radius: 16px;
+    overflow: hidden;
+    aspect-ratio: 16 / 10;
+  }
+  .showcase-row--bottom .showcase-card { aspect-ratio: 16 / 7; }
+  .showcase-card img { width: 100%; height: 100%; object-fit: cover; }
+  .showcase-tag {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0,0,0,.78);
+    color: #fff;
+    padding: 8px 18px;
+    border-radius: 999px;
+    font-size: 13px;
+    z-index: 2;
+  }
+  .showcase-play {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 3;
+  }
+  .showcase-play button {
+    width: 72px; height: 72px;
+    border-radius: 50%;
+    background: #fff;
+    color: var(--ink);
+    font-size: 22px;
+    display: grid; place-items: center;
+    box-shadow: 0 12px 28px rgba(0,0,0,.35);
+  }
+
+  /* ───────────── Hello / Intro ───────────── */
+  .hello { padding: 140px 0; overflow: hidden; }
+  .hello-eyebrow {
+    text-align: center;
+    margin-bottom: 90px;
+  }
+  .hello-eyebrow span {
+    position: relative;
+    font-family: "Caveat", cursive;
+    font-style: italic;
+    font-size: 28px;
+    color: var(--muted);
+  }
+  .hello-eyebrow span::before,
+  .hello-eyebrow span::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    width: 90px;
+    height: 1px;
+    background: rgba(0,0,0,.18);
+  }
+  .hello-eyebrow span::before { right: 100%; margin-right: 22px; }
+  .hello-eyebrow span::after { left: 100%; margin-left: 22px; }
+
+  .hello-stage {
+    position: relative;
+    margin: 0 80px;
+    min-height: 280px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .hello-title {
+    text-align: center;
+    font-size: clamp(32px, 3.6vw, 52px);
+    font-weight: 600;
+    letter-spacing: -.025em;
+    line-height: 1.12;
+    max-width: 560px;
+    text-wrap: balance;
+  }
+
+  .hello-pill {
+    position: absolute;
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    background: #fff;
+    border-radius: 999px;
+    padding: 12px 22px 12px 12px;
+    font-size: 19px;
+    font-weight: 500;
+    color: var(--ink);
+    box-shadow: 0 14px 30px -12px rgba(0,0,0,.22), 0 2px 6px rgba(0,0,0,.06);
+    white-space: nowrap;
+  }
+  .hello-ico {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    display: grid; place-items: center;
+    color: #fff;
+    font-size: 15px;
+    line-height: 1;
+  }
+  /* left cluster — flush to the 80px container inset */
+  .hello-pill--a { left: 0;    top: 18%;  transform: rotate(-3deg); }
+  .hello-pill--b { left: 40px; top: 42%;  transform: rotate(2deg); }
+  .hello-pill--c { left: 14px; top: 66%;  transform: rotate(-2deg); }
+  /* right cluster — flush to the 80px container inset */
+  .hello-pill--d { right: 0;    top: 18%;  transform: rotate(3deg); }
+  .hello-pill--e { right: 34px; top: 42%;  transform: rotate(-2deg); }
+  .hello-pill--f { right: 14px; top: 66%;  transform: rotate(2deg); }
+
+  /* ───────────── Skills × Pricing ───────────── */
+  .skills { padding-top: 60px; }
+
+  /* Two-column shell: left = heading + stacked cards, right = sticky author card */
+  .skills-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 520px) 300px;
+    gap: 70px;
+    align-items: start;
+    justify-content: space-between;
+    margin: 0 80px;
+  }
+
+  .skills-header { max-width: 560px; margin-bottom: 80px; }
+  .skills-title {
+    margin-top: 14px;
+    font-size: clamp(48px, 5.6vw, 80px);
+    font-weight: 700;
+    letter-spacing: -.03em;
+    line-height: 1.02;
+  }
+  .skills-title em { font-style: normal; color: var(--dot); }
+  .skills-sub {
+    margin-top: 22px;
+    color: var(--ink-soft);
+    font-size: 16px;
+    max-width: 480px;
+  }
+
+  /* Stack of skill cards (left column) */
+  .skills-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 56px;
+  }
+
+  /* Faint outline frame behind each card */
+  .skill-card {
+    position: relative;
+    padding: 18px;
+    border: 1px solid rgba(0,0,0,.18);
+    border-radius: 28px;
+    background: transparent;
+  }
+  .skill-card-inner {
+    background: #fff;
+    border-radius: 22px;
+    padding: 34px 36px 38px;
+    box-shadow: 0 1px 0 rgba(0,0,0,.04), 0 18px 40px -28px rgba(0,0,0,.18);
+  }
+  .skill-tag {
+    display: inline-block;
+    font-family: "Caveat", "Bradley Hand", cursive;
+    font-size: 20px;
+    color: var(--ink);
+    margin-bottom: 24px;
+  }
+  .skill-name {
+    font-size: clamp(28px, 3vw, 36px);
+    font-weight: 700;
+    letter-spacing: -.02em;
+    line-height: 1.05;
+  }
+  .skill-desc {
+    margin-top: 18px;
+    color: var(--ink-soft);
+    font-size: 15px;
+    line-height: 1.5;
+    max-width: 400px;
+  }
+  .skill-list {
+    margin-top: 26px;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 9px;
+    color: var(--ink-soft);
+    font-size: 15px;
+    list-style: disc;
+    padding-left: 22px;
+  }
+  .skill-list li::marker { color: var(--ink-soft); }
+
+  /* Right column author card — sticky so it stays in view while user scrolls cards */
+  .skills-author {
+    position: sticky;
+    top: 100px;
+    aspect-ratio: 4 / 5;
+    border-radius: 22px;
+    overflow: hidden;
+    background: #1a1a1a;
+  }
+  .skills-author img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    opacity: .85;
+  }
+  .skills-author-meta {
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    padding: 24px 28px 28px;
+    color: #fff;
+    background: linear-gradient(180deg, transparent, rgba(0,0,0,.55) 60%);
+  }
+  .skills-author-name {
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: -.01em;
+  }
+  .skills-author-role {
+    margin-top: 4px;
+    font-size: 16px;
+    opacity: .9;
+  }
+
+  /* ───────────── Career / Work Experience ───────────── */
+  .career { padding: 120px 0; }
+  .career-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 24px;
+    margin: 0 80px 90px;
+  }
+  .career-eyebrow {
+    font-family: "Caveat", cursive;
+    font-size: 24px;
+    color: var(--ink);
+    margin-bottom: 26px;
+  }
+  .career-title {
+    font-size: clamp(44px, 5vw, 76px);
+    font-weight: 700;
+    letter-spacing: -.03em;
+    line-height: 1;
+  }
+  .career-title em { font-style: normal; color: var(--dot); }
+  .career-sub {
+    margin-top: 22px;
+    color: var(--ink-soft);
+    font-size: 18px;
+  }
+  .career-cv {
+    flex: none;
+    background: rgba(0,0,0,.06);
+    color: var(--ink);
+    padding: 12px 22px;
+    border-radius: 999px;
+    font-size: 16px;
+    font-weight: 500;
+    transition: background .2s;
+  }
+  .career-cv:hover { background: rgba(0,0,0,.12); }
+
+  .career-list {
+    margin: 0 80px;
+    display: flex;
+    flex-direction: column;
+  }
+  .career-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 24px;
+    padding: 36px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .career-row:first-child { padding-top: 0; }
+  .career-row:last-child { border-bottom: 0; }
+  .career-job {
+    font-size: clamp(24px, 2.4vw, 32px);
+    font-weight: 700;
+    letter-spacing: -.015em;
+  }
+  .career-company {
+    margin-top: 18px;
+    color: var(--muted);
+    font-size: 18px;
+  }
+  .career-period {
+    flex: none;
+    color: var(--ink-soft);
+    font-size: 18px;
+    padding-top: 6px;
+  }
+
+  /* ───────────── Responsive ───────────── */
+  @media (max-width: 1000px) {
+    .skills-layout { grid-template-columns: 1fr; gap: 40px; margin: 0; }
+    .skills-author { position: relative; top: 0; max-width: 360px; }
+    .hello-stage { margin: 0; }
+  }
+  @media (max-width: 900px) {
+    section { padding: 80px 0; }
+    .nav-links { display: none; }
+    .skill-card-inner { padding: 28px 24px 32px; }
+    .career-header { margin: 0 0 56px; flex-direction: column; }
+    .career-list { margin: 0; }
+    .showcase-row { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- ─────────── NAV ─────────── -->
+  <header class="site-nav">
+    <div class="container">
+      <nav>
+        <a href="#" class="brand">Nikola</a>
+
+        <!-- CSS-only toggle (no JS) -->
+        <input type="checkbox" id="nav-toggle" class="nav-toggle" hidden />
+
+        <label for="nav-toggle" class="nav-burger" aria-label="Open menu">
+          <span></span><span></span>
+        </label>
+
+        <!-- overlay + sliding panel -->
+        <label for="nav-toggle" class="nav-scrim" aria-hidden="true"></label>
+
+        <aside class="nav-panel" role="dialog" aria-label="Menu">
+          <label for="nav-toggle" class="nav-close" aria-label="Close menu">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+              <path d="M6 6l12 12M18 6L6 18" />
+            </svg>
+          </label>
+
+          <ul class="nav-menu">
+            <li><a href="#about">Process</a></li>
+            <li><a href="#work">Portfolio</a></li>
+            <li><a href="#about">About</a></li>
+            <li><a href="#career">Price</a></li>
+            <li><a href="#faq">FAQ</a></li>
+            <li><a href="#contact">Contact</a></li>
+          </ul>
+
+          <div class="nav-socials">
+            <a href="#" aria-label="Email">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5">
+                <rect x="3" y="5" width="18" height="14" rx="2" /><path d="M3 7l9 6 9-6" />
+              </svg>
+            </a>
+            <a href="#" aria-label="Instagram">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5">
+                <rect x="3" y="3" width="18" height="18" rx="5" /><circle cx="12" cy="12" r="4" /><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
+              </svg>
+            </a>
+            <a href="#" aria-label="LinkedIn">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5">
+                <rect x="3" y="3" width="18" height="18" rx="3" /><path d="M7 10v7M7 7v.01M11 17v-4a2 2 0 0 1 4 0v4M11 10v7" />
+              </svg>
+            </a>
+            <a href="#" aria-label="Figma">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M12 3H9a3 3 0 0 0 0 6h3m0-6h3a3 3 0 0 1 0 6h-3m0-6v6m0 0H9a3 3 0 0 0 0 6h3v-6zm0 6v3a3 3 0 1 1-3-3h3zm0-6h0a3 3 0 1 0 3 3 3 3 0 0 0-3-3z" />
+              </svg>
+            </a>
+          </div>
+        </aside>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ─────────── 1. HERO ─────────── -->
+  <section class="hero">
+
+    <!-- decorative skewed light-beam background -->
+    <div class="hero-bg" aria-hidden="true">
+      <span class="hero-beam hero-beam--1"></span>
+      <span class="hero-beam hero-beam--2"></span>
+      <span class="hero-beam hero-beam--3"></span>
+      <span class="hero-beam hero-beam--4"></span>
+      <span class="hero-beam hero-beam--5"></span>
+    </div>
+
+    <div class="container">
+      <span class="hero-badge">✦ Hi, I'm Nikola</span>
+
+      <h1 class="hero-title">
+        Brands
+        <span class="hero-inline-img">
+          <img src="https://placehold.co/120x60?text=icon" alt="inline icon" />
+        </span>
+        Grow Fast
+        <span class="hero-inline-img">
+          <img src="https://placehold.co/120x60?text=icon" alt="inline icon" />
+        </span>
+        With us
+      </h1>
+
+      <p class="hero-sub">
+        We help brands grow with standout design, clear branding,
+        and content that drives results.
+      </p>
+
+      <a href="#contact" class="hero-cta">
+        <span class="hero-cta-dot">●</span>
+        Book a call
+      </a>
+    </div>
+  </section>
+
+  <!-- ─────────── 2. SHOWCASE GRID ─────────── -->
+  <section class="showcase">
+    <div class="container">
+      <div class="showcase-frame">
+
+        <div class="showcase-row showcase-row--top">
+          <figure class="showcase-card">
+            <img src="https://placehold.co/640x400?text=Project+1" alt="Project 1" />
+          </figure>
+          <figure class="showcase-card showcase-card--tag">
+            <span class="showcase-tag">Freelance</span>
+            <img src="https://placehold.co/640x400?text=Project+2" alt="Project 2" />
+          </figure>
+        </div>
+
+        <div class="showcase-play">
+          <button type="button" aria-label="Play showreel">▶</button>
+        </div>
+
+        <div class="showcase-row showcase-row--bottom">
+          <figure class="showcase-card">
+            <img src="https://placehold.co/640x300?text=Project+3" alt="Project 3" />
+          </figure>
+          <figure class="showcase-card">
+            <img src="https://placehold.co/640x300?text=Project+4" alt="Project 4" />
+          </figure>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────── 3. HELLO / INTRO ─────────── -->
+  <section class="hello" id="about">
+    <div class="container">
+
+      <p class="hello-eyebrow"><span>Hello!</span></p>
+
+      <div class="hello-stage">
+
+        <!-- left floating pills -->
+        <span class="hello-pill hello-pill--a">
+          <span class="hello-ico" style="background:#ff6a2b;">▦</span>
+          Design systems
+        </span>
+        <span class="hello-pill hello-pill--b">
+          <span class="hello-ico" style="background:#1c1c1c;">▢</span>
+          UX Design
+        </span>
+        <span class="hello-pill hello-pill--c">
+          <span class="hello-ico" style="background:#2b8bff;">◎</span>
+          Research
+        </span>
+
+        <!-- center headline -->
+        <h2 class="hello-title">
+          We help brands grow with standout design,
+          clear branding, and content that drives results.
+        </h2>
+
+        <!-- right floating pills -->
+        <span class="hello-pill hello-pill--d">
+          <span class="hello-ico" style="background:#27d07a;">∿</span>
+          Animation
+        </span>
+        <span class="hello-pill hello-pill--e">
+          <span class="hello-ico" style="background:#ff2bb5;">▤</span>
+          Branding
+        </span>
+        <span class="hello-pill hello-pill--f">
+          <span class="hello-ico" style="background:#ffcf26;">⋈</span>
+          Strategy
+        </span>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ─────────── 4. SKILLS × PRICING MIX ─────────── -->
+  <!--
+    Each skill is rendered like the "Benefits Included" panel from the
+    pricing section: a card with a numbered title on top and a
+    checkmark-style list of deliverables underneath.
+    The whole section is wrapped with a pricing-style header
+    (eyebrow "Skills" + headline "What I do best").
+  -->
+  <section class="skills" id="skills">
+    <div class="container">
+
+      <div class="skills-layout">
+
+        <!-- LEFT: heading + stacked skill cards -->
+        <div class="skills-main">
+
+          <header class="skills-header">
+            <h2 class="skills-title">What I do <em>best</em>?</h2>
+            <p class="skills-sub">
+              I lead brands, teams, and projects — creating design, web, video,
+              and marketing solutions that help businesses grow and make a
+              real impact.
+            </p>
+          </header>
+
+          <div class="skills-stack">
+
+            <article class="skill-card">
+              <div class="skill-card-inner">
+                <span class="skill-tag">Top performing</span>
+                <h3 class="skill-name">01. Web Design</h3>
+                <p class="skill-desc">
+                  I design no-code websites that are responsive, mobile-friendly,
+                  and SEO-ready. Every site is built for usability, speed,
+                  and modern design.
+                </p>
+                <ul class="skill-list">
+                  <li>Figma</li>
+                  <li>Framer</li>
+                  <li>Webflow</li>
+                  <li>Vercel</li>
+                  <li>WordPress</li>
+                  <li>Elementor</li>
+                  <li>Avada</li>
+                  <li>Experienced with AI builders</li>
+                </ul>
+              </div>
+            </article>
+
+            <article class="skill-card">
+              <div class="skill-card-inner">
+                <span class="skill-tag">MVP &amp; go-to-market</span>
+                <h3 class="skill-name">02. Product Design</h3>
+                <p class="skill-desc">
+                  From first sketch to shipped product — I design SaaS dashboards
+                  and mobile apps that feel obvious to use and easy to grow.
+                </p>
+                <ul class="skill-list">
+                  <li>SaaS dashboards</li>
+                  <li>Mobile apps</li>
+                  <li>Prototyping</li>
+                  <li>Design QA</li>
+                </ul>
+              </div>
+            </article>
+
+            <article class="skill-card">
+              <div class="skill-card-inner">
+                <span class="skill-tag">Foundations</span>
+                <h3 class="skill-name">03. UI / UX Systems</h3>
+                <p class="skill-desc">
+                  Design tokens, component libraries, and documentation that keep
+                  fast-moving teams consistent and accessible by default.
+                </p>
+                <ul class="skill-list">
+                  <li>Design tokens</li>
+                  <li>Component libraries</li>
+                  <li>Documentation</li>
+                  <li>Accessibility audits</li>
+                </ul>
+              </div>
+            </article>
+
+            <article class="skill-card">
+              <div class="skill-card-inner">
+                <span class="skill-tag">Print &amp; identity</span>
+                <h3 class="skill-name">04. Graphic Design</h3>
+                <p class="skill-desc">
+                  Posters, packaging, editorial layouts, merch — graphic work that
+                  carries a brand voice off-screen into the real world.
+                </p>
+                <ul class="skill-list">
+                  <li>Print &amp; editorial</li>
+                  <li>Posters</li>
+                  <li>Packaging</li>
+                  <li>Merchandise</li>
+                </ul>
+              </div>
+            </article>
+
+            <article class="skill-card">
+              <div class="skill-card-inner">
+                <span class="skill-tag">Brand identity</span>
+                <h3 class="skill-name">05. Visual Design</h3>
+                <p class="skill-desc">
+                  Logos, type systems, and art direction that give a brand a clear
+                  point of view — recognisable across every touchpoint.
+                </p>
+                <ul class="skill-list">
+                  <li>Brand identity</li>
+                  <li>Logo systems</li>
+                  <li>Typography</li>
+                  <li>Art direction</li>
+                </ul>
+              </div>
+            </article>
+
+            <article class="skill-card">
+              <div class="skill-card-inner">
+                <span class="skill-tag">Motion &amp; story</span>
+                <h3 class="skill-name">06. Video Editing</h3>
+                <p class="skill-desc">
+                  Short-form content, brand films, and motion graphics — edited
+                  with pacing, color, and sound design that hold attention.
+                </p>
+                <ul class="skill-list">
+                  <li>Short-form content</li>
+                  <li>Brand films</li>
+                  <li>Motion graphics</li>
+                  <li>Color &amp; sound</li>
+                </ul>
+              </div>
+            </article>
+
+            <article class="skill-card">
+              <div class="skill-card-inner">
+                <span class="skill-tag">Growth</span>
+                <h3 class="skill-name">07. Digital Marketing</h3>
+                <p class="skill-desc">
+                  Campaign strategy, ad creative, and analytics — turning design
+                  into measurable outcomes for the business.
+                </p>
+                <ul class="skill-list">
+                  <li>Campaign strategy</li>
+                  <li>Ad creative</li>
+                  <li>Email design</li>
+                  <li>Analytics &amp; reporting</li>
+                </ul>
+              </div>
+            </article>
+
+            <article class="skill-card">
+              <div class="skill-card-inner">
+                <span class="skill-tag">Always on</span>
+                <h3 class="skill-name">08. Social Media Marketing</h3>
+                <p class="skill-desc">
+                  Content calendars, reels, and paid social — building an audience
+                  that recognises the brand and keeps coming back.
+                </p>
+                <ul class="skill-list">
+                  <li>Content calendars</li>
+                  <li>Reels &amp; shorts</li>
+                  <li>Community management</li>
+                  <li>Paid social</li>
+                </ul>
+              </div>
+            </article>
+
+          </div>
+        </div>
+
+        <!-- RIGHT: sticky author card -->
+        <aside class="skills-author">
+          <img src="https://placehold.co/480x600?text=Author" alt="Author portrait" />
+          <div class="skills-author-meta">
+            <div class="skills-author-name">Nikola Radeski</div>
+            <div class="skills-author-role">Designer &amp; Founder</div>
+          </div>
+        </aside>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────────── 5. WORK EXPERIENCE ─────────── -->
+  <section class="career" id="career">
+    <div class="container">
+
+      <header class="career-header">
+        <div class="career-headings">
+          <p class="career-eyebrow">/ Career</p>
+          <h2 class="career-title">Work <em>Experience</em></h2>
+          <p class="career-sub">My impact over the years.</p>
+        </div>
+        <a href="#" class="career-cv">Download CV</a>
+      </header>
+
+      <ul class="career-list">
+        <li class="career-row" style="gap: 22px">
+          <div class="career-role">
+            <h3 class="career-job" style="font-size: 16px">Creative Designer</h3>
+            <p class="career-company" style="font-size: 16px">TryHackMe LLC</p>
+          </div>
+          <span class="career-period">2025 – Current</span>
+        </li>
+
+        <li class="career-row">
+          <div class="career-role">
+            <h3 class="career-job">Founder / Creative Director</h3>
+            <p class="career-company">DirectlyNik™</p>
+          </div>
+          <span class="career-period">2023 – Current</span>
+        </li>
+
+        <li class="career-row">
+          <div class="career-role">
+            <h3 class="career-job">Head of Design</h3>
+            <p class="career-company">Involve</p>
+          </div>
+          <span class="career-period">2024 – 2025</span>
+        </li>
+      </ul>
+
+    </div>
+  </section>
+
+</body>
+</html>
