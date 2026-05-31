@@ -15,12 +15,16 @@ window.requestAnimationFrame =
   function requestAnimationFrame(callback) {
     return window.setTimeout(() => callback(Date.now()), 16);
   };
+globalThis.requestAnimationFrame = window.requestAnimationFrame;
 
 window.cancelAnimationFrame =
   window.cancelAnimationFrame ||
   function cancelAnimationFrame(frame) {
     window.clearTimeout(frame);
   };
+globalThis.cancelAnimationFrame = window.cancelAnimationFrame;
+
+window.scrollTo = function scrollTo() {};
 
 class ResizeObserverMock {
   observe() {}

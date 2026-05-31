@@ -103,6 +103,47 @@ export const careerEntries = [
   { role: 'Head of Design',              company: 'Involve',        period: '2024 – 2025' },
 ];
 
-// Legacy exports — kept so existing imports don't break
-export const projects = [];
+export const projects = [
+  {
+    id: 1,
+    name: 'San Miguel',
+    role: "America's Cup",
+    imageUrl: 'https://placehold.co/1200x800/2b3b34/ffffff?text=San+Miguel',
+    videoUrl: null,
+    detailUrl: '#',
+    tags: 'Brand · Web · Motion',
+    year: '2025',
+  },
+  {
+    id: 2,
+    name: 'Atlas Finance',
+    role: 'Product Design',
+    imageUrl: 'https://placehold.co/1200x800/c9c5bc/15161a?text=Atlas',
+    videoUrl: null,
+    detailUrl: '#',
+    tags: 'Product Design',
+    year: '2025',
+  },
+  {
+    id: 3,
+    name: 'Helios Studio',
+    role: 'Brand System',
+    imageUrl: 'https://placehold.co/1200x800/1b1b1d/ffffff?text=Helios',
+    videoUrl: null,
+    detailUrl: '#',
+    tags: 'Brand · Web',
+    year: '2024',
+  },
+  {
+    id: 4,
+    name: 'Field Notes',
+    role: 'Editorial',
+    imageUrl: 'https://placehold.co/1200x800/8e8b83/ffffff?text=Field+Notes',
+    videoUrl: null,
+    detailUrl: '#',
+    tags: 'Editorial · Motion',
+    year: '2024',
+  },
+];
+
 export const services = [];

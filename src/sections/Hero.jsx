@@ -6,7 +6,6 @@ import status from "../data/status.json";
 
 export default function Hero() {
   const sectionRef = useRef(null);
-  const statusClass = status.work ? "is-available" : "is-unavailable";
 
   useGSAP(
     () => {
@@ -100,65 +99,126 @@ export default function Hero() {
   );
 
   return (
-    <section className="hero" ref={sectionRef}>
-      {/* Decorative light-beam backdrop — animate each beam with GSAP if desired */}
-      <div className="hero-bg" aria-hidden="true">
+    <section
+      className="relative min-h-screen pt-[190px] pb-24 text-center bg-[#f2f2f0] overflow-hidden"
+      ref={sectionRef}
+    >
+      {/* Background beams — mask gradients live in styles.css */}
+      <div
+        className="absolute inset-0 z-0 pointer-events-none overflow-hidden"
+        aria-hidden="true"
+        style={{
+          background:
+            "radial-gradient(circle at 10% 3%, rgba(255,255,255,0.94) 0 9%, transparent 23%), linear-gradient(225deg, #f9f9f9 0%, #d7d7d7 70%, #cfcfcf 100%)",
+          WebkitMask:
+            "radial-gradient(125% 100% at 0 0, #000 0%, rgba(0,0,0,0.22) 88%, transparent 100%)",
+          mask: "radial-gradient(125% 100% at 0 0, #000 0%, rgba(0,0,0,0.22) 88%, transparent 100%)",
+        }}
+      >
         {[1, 2, 3, 4, 5].map((n) => (
           <span key={n} className={`hero-beam hero-beam--${n}`} />
         ))}
       </div>
 
-      <div className="hero-side-tag" aria-hidden="true">
-        <strong>W.</strong>
-        <span>Nominee</span>
+      {/* Side tag */}
+      <div
+        className="absolute top-[26%] right-0 grid w-[62px] h-[244px] [grid-template-rows:84px_1fr] items-center justify-items-center bg-white shadow-[-10px_18px_40px_rgba(0,0,0,0.08)]"
+        aria-hidden="true"
+      >
+        <strong className="text-[28px] leading-none">W.</strong>
+        <span className="-rotate-90 text-[#0c0c0c] text-[14px] font-extrabold tracking-[0.04em] whitespace-nowrap">
+          Nominee
+        </span>
       </div>
 
-      <div className="container hero-inner">
-        <span className="hero-badge">
+      <div className="container flex flex-col items-center justify-center min-h-[calc(100vh-286px)]">
+        {/* Badge */}
+        <span className="hero-badge inline-flex items-center gap-2 px-5 py-3 bg-white border border-black/[0.08] rounded-full text-[#191919] text-[clamp(14px,1.2vw,18px)] font-medium shadow-[0_18px_50px_rgba(0,0,0,0.06)] opacity-0">
           <span
-            className={`hero-status-dot ${statusClass}`}
+            className={`hero-status-dot w-[7px] h-[7px] rounded-full ${
+              status.work
+                ? "bg-[#21c45d] shadow-[0_0_0_4px_rgba(33,196,93,0.16)]"
+                : "bg-[#e53935] shadow-[0_0_0_4px_rgba(229,57,53,0.14)]"
+            }`}
             aria-hidden="true"
           />
           Available to work
         </span>
 
-        <h1 className="hero-title" aria-label="Brands Grow Fast With us">
-          <span className="hero-title-row">
-            <span className="hero-word hero-word--dark">Brands</span>
-            <span className="hero-mockup hero-mockup--site" aria-hidden="true">
-              <span className="mock-browser">
-                <span />
-                <span />
-                <span />
-              </span>
-              <span className="mock-copy">
-                <b>UI/UX</b>
-                <small>Brand system</small>
-              </span>
-              <span className="mock-line" />
+        {/* Title */}
+        <h1
+          className="hero-title grid justify-items-center mt-[82px] mb-[58px] mx-auto max-w-[1160px] font-display [font-feature-settings:'salt'_on] text-[108px] font-bold leading-[0.88] tracking-[-0.055em] opacity-0"
+          aria-label="Brands Grow Fast With us"
+        >
+          {/* Row 1 */}
+          <span className="flex items-center justify-center gap-[clamp(18px,2.7vw,42px)] min-w-0">
+            <span className="hero-word inline-block whitespace-nowrap text-[#020202]">
+              Brands
             </span>
-            <span className="hero-word hero-word--muted">Grow</span>
+
+            {/* Site mockup */}
+            <span
+              className="hero-mockup hero-mockup--site relative inline-grid flex-none place-items-center overflow-hidden border-[4px] border-[#050505] rounded-[34px] shadow-[0_24px_34px_rgba(0,0,0,0.28),inset_0_0_0_1px_rgba(255,255,255,0.6)] w-[147px] h-[112px] p-[18px] bg-[#f9f9f7] -rotate-[1.5deg]"
+              aria-hidden="true"
+            >
+              <span className="mock-browser absolute top-[14px] left-[17px] flex gap-1">
+                <span className="w-1 h-1 rounded-full bg-[#b22a2a]" />
+                <span className="w-1 h-1 rounded-full bg-[#b22a2a]" />
+                <span className="w-1 h-1 rounded-full bg-[#b22a2a]" />
+              </span>
+              <span className="mock-copy absolute top-[32px] left-[18px] grid gap-1 w-[58px] text-left">
+                <b className="text-[8px] leading-none">UI/UX</b>
+                <small className="text-[#777] text-[6px] leading-[1.1]">
+                  Brand system
+                </small>
+              </span>
+              <span className="mock-line absolute right-[15px] bottom-[20px] w-[76px] h-[34px] border-[6px] border-[#7c3131] border-l-0 border-b-0 rounded-tr-[26px]" />
+            </span>
+
+            <span className="hero-word inline-block whitespace-nowrap text-[#777] font-medium">
+              Grow
+            </span>
           </span>
-          <span className="hero-title-row">
-            <span className="hero-word hero-word--muted">Fast</span>
-            <span className="hero-mockup hero-mockup--dark" aria-hidden="true">
+
+          {/* Row 2 */}
+          <span className="flex items-center justify-center gap-[clamp(18px,2.7vw,42px)] min-w-0 mt-[26px]">
+            <span className="hero-word inline-block whitespace-nowrap text-[#777] font-medium">
+              Fast
+            </span>
+
+            {/* Dark mockup */}
+            <span
+              className="hero-mockup hero-mockup--dark relative inline-grid flex-none place-items-center overflow-hidden border-[4px] border-[#050505] rounded-[34px] shadow-[0_24px_34px_rgba(0,0,0,0.28),inset_0_0_0_1px_rgba(255,255,255,0.6)] w-[147px] h-[112px] rotate-[1.6deg] bg-[#242424] text-[#bfbfbf] text-[clamp(16px,1.9vw,27px)] font-bold tracking-[-0.04em]"
+              aria-hidden="true"
+            >
               <span>Webflow</span>
             </span>
-            <span className="hero-word hero-word--dark">With us</span>
+
+            <span className="hero-word inline-block whitespace-nowrap text-[#020202]">
+              With us
+            </span>
           </span>
         </h1>
 
-        <p className="hero-sub">
-          We don't just make brands pretty — we craft smart design that fuels
-          real business growth.
+        {/* Subheading */}
+        <p className="hero-sub max-w-[550px] mx-auto mb-[72px] text-[#6f6f6f] text-[16px] leading-[1.55] font-medium opacity-0">
+          We don&apos;t just make brands pretty — we craft smart design that
+          fuels real business growth.
         </p>
 
-        <a href="#contact" className="hero-cta">
-          <span className="hero-cta-icon" aria-hidden="true">
+        {/* CTA */}
+        <a
+          href="#contact"
+          className="hero-cta inline-flex items-center gap-3.5 min-h-[72px] bg-[#030303] text-white px-[18px] py-2 pl-[10px] border-[9px] border-white/[0.72] rounded-full text-[clamp(16px,1.35vw,22px)] font-bold shadow-[0_24px_60px_rgba(0,0,0,0.22),inset_0_0_0_1px_rgba(255,255,255,0.14)] opacity-0"
+        >
+          <span
+            className="hero-cta-icon inline-grid w-[45px] h-[45px] place-items-center rounded-full bg-white text-[#111] text-[20px] flex-shrink-0"
+            aria-hidden="true"
+          >
             ✦
           </span>
           Book a Meeting
-          <span className="hero-cta-arrow" aria-hidden="true">
+          <span className="hero-cta-arrow text-[24px] leading-none" aria-hidden="true">
             →
           </span>
         </a>

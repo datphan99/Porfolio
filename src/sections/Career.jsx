@@ -49,26 +49,36 @@ export default function Career() {
   );
 
   return (
-    <section className="career" id="career" ref={sectionRef}>
+    <section className="py-[120px]" id="career" ref={sectionRef}>
       <div className="container">
 
-        <div className="career-header">
+        <div className="career-header flex items-start justify-between gap-6 mb-[90px] max-md:flex-col max-md:mb-14">
           <div className="career-headings">
-            <p className="career-eyebrow">/ Career</p>
-            <h2 className="career-title">Work <em>Experience</em></h2>
-            <p className="career-sub">My impact over the years.</p>
+            <p className="font-script text-[24px] text-[#111] mb-[26px]">/ Career</p>
+            <h2 className="text-[clamp(44px,5vw,76px)] font-bold tracking-[-0.03em] leading-none">
+              Work <em className="not-italic text-[#ff3700]">Experience</em>
+            </h2>
+            <p className="mt-[22px] text-black/50 text-[18px]">My impact over the years.</p>
           </div>
-          <a href="#" className="career-cv">Download CV</a>
+          <a
+            href="#"
+            className="career-cv flex-none bg-black/[0.06] text-[#111] px-[22px] py-3 rounded-full text-[16px] font-medium hover:bg-black/[0.12] transition-colors duration-200"
+          >
+            Download CV
+          </a>
         </div>
 
-        <ul className="career-list">
+        <ul className="career-list flex flex-col">
           {careerEntries.map((entry, i) => (
-            <li className="career-row" key={i}>
-              <div className="career-role">
-                <h3 className="career-job">{entry.role}</h3>
-                <p className="career-company">{entry.company}</p>
+            <li
+              className="career-row flex items-start justify-between gap-6 py-9 border-b border-black/[0.08] first:pt-0 last:border-b-0"
+              key={i}
+            >
+              <div>
+                <h3 className="text-[clamp(24px,2.4vw,32px)] font-bold tracking-[-0.015em]">{entry.role}</h3>
+                <p className="mt-[18px] text-black/40 text-[18px]">{entry.company}</p>
               </div>
-              <span className="career-period">{entry.period}</span>
+              <span className="flex-none text-black/50 text-[18px] pt-1.5">{entry.period}</span>
             </li>
           ))}
         </ul>

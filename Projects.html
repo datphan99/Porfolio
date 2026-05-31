@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Projects — Peek Reveal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  :root{
+    --bg: #f1f1f1;
+    --ink: #15161a;
+    --ink-grey: #b3b3b6;
+    --ink-soft: #86868b;
+    --line: rgba(0,0,0,.10);
+    --pad: 30px;
+    --font: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  html, body { margin: 0; }
+  body {
+    font-family: var(--font);
+    color: var(--ink);
+    background: var(--bg);
+    -webkit-font-smoothing: antialiased;
+  }
+  img { display: block; max-width: 100%; }
+
+  /* spacer so you can scroll INTO and OUT of the pinned section while testing */
+  .spacer { height: 70vh; display: grid; place-items: center; color: var(--ink-grey);
+            font-size: 13px; letter-spacing: .18em; text-transform: uppercase; }
+
+  /* ═══════════ PEEK-REVEAL STAGE ═══════════ */
+  .projects {
+    position: relative;
+    min-height: 520vh;          /* drives pin duration / conveyor length */
+  }
+  .projects-stage {
+    height: 100vh;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .stage-eyebrow {
+    position: absolute; top: 38px; left: 0; right: 0;
+    text-align: center; z-index: 4;
+    font-size: 12px; font-weight: 500;
+    letter-spacing: .22em; text-transform: uppercase;
+    color: var(--ink-grey);
+  }
+
+  /* center statement — pinned, never wraps, mist entrance */
+  .statements {
+    position: absolute; inset: 0;
+    display: grid; place-items: center;
+    z-index: 3; pointer-events: none;
+  }
+  .statement {
+    margin: 0;
+    white-space: nowrap;                 /* ← no line break */
+    font-size: clamp(30px, 6vw, 104px);
+    font-weight: 600;
+    letter-spacing: -.035em;
+    line-height: 1;
+    color: var(--ink);
+    will-change: filter, opacity, transform;
+  }
+
+  /* edge project cards (the conveyor) */
+  .peek {
+    position: absolute;
+    top: 50%;
+    width: clamp(200px, 21vw, 380px);
+    border-radius: 16px;
+    overflow: hidden;
+    z-index: 1;
+    box-shadow: 0 40px 80px -34px rgba(0,0,0,.45);
+    will-change: transform, opacity, filter;
+  }
+  .peek img { width: 100%; height: 100%; object-fit: cover; aspect-ratio: 4 / 5; }
+  .peek--left  { left:  clamp(-30px, 2.5vw, 60px); }
+  .peek--right { right: clamp(-30px, 2.5vw, 60px); }
+
+  .peek-caption {
+    position: absolute; left: 16px; bottom: 14px;
+    display: flex; gap: 9px; align-items: baseline;
+    color: #fff; text-shadow: 0 1px 12px rgba(0,0,0,.55);
+  }
+  .peek-caption b { font-size: 15px; font-weight: 600; letter-spacing: -.01em; }
+  .peek-caption span {
+    font-size: 11px; font-weight: 500;
+    letter-spacing: .14em; text-transform: uppercase; opacity: .85;
+  }
+
+  /* progress hairline at the bottom of the stage */
+  .stage-progress {
+    position: absolute; left: var(--pad); right: var(--pad); bottom: 30px;
+    height: 1px; background: var(--line); z-index: 4; transform-origin: left center;
+  }
+  .stage-progress::after {
+    content: ""; position: absolute; inset: 0;
+    background: var(--ink); transform: scaleX(0); transform-origin: left center;
+  }
+
+  /* fallback when JS/GSAP off or reduced-motion: simple readable state */
+  .no-anim .projects { min-height: auto; }
+  .no-anim .projects-stage { height: auto; padding: 120px var(--pad); }
+  .no-anim .statements { position: static; }
+  .no-anim .peek { position: static; width: 100%; margin: 16px 0; opacity: 1 !important; }
+
+  @media (max-width: 720px) {
+    :root { --pad: 22px; }
+    .peek { width: clamp(150px, 40vw, 220px); }
+  }
+</style>
+</head>
+<body>
+
+  <div class="spacer">Scroll down ↓</div>
+
+  <!-- ═══════════════ PROJECTS · PEEK REVEAL ═══════════════ -->
+  <section class="projects" data-projects data-screen-label="Projects">
+    <div class="projects-stage" data-stage>
+
+      <p class="stage-eyebrow">Selected Work</p>
+
+      <div class="statements">
+        <h2 class="statement" data-statement>Unforgettable experiences</h2>
+      </div>
+
+      <!-- Conveyor cards. Order = appearance order. Sides alternate.
+           data-depth tunes per-card scale/opacity emphasis. -->
+      <figure class="peek peek--left"  data-peek data-depth="1.0">
+        <img src="https://placehold.co/600x750/2b3b34/ffffff?text=San+Miguel" alt="San Miguel — America's Cup" />
+        <figcaption class="peek-caption"><b>San Miguel</b> <span>America's Cup</span></figcaption>
+      </figure>
+
+      <figure class="peek peek--right" data-peek data-depth="1.12">
+        <img src="https://placehold.co/600x750/c9c5bc/15161a?text=Atlas" alt="Atlas — Finance" />
+        <figcaption class="peek-caption"><b>Atlas</b> <span>Finance app</span></figcaption>
+      </figure>
+
+      <figure class="peek peek--left"  data-peek data-depth="0.92">
+        <img src="https://placehold.co/600x750/1b1b1d/ffffff?text=Helios" alt="Helios — Brand" />
+        <figcaption class="peek-caption"><b>Helios</b> <span>Brand system</span></figcaption>
+      </figure>
+
+      <figure class="peek peek--right" data-peek data-depth="1.06">
+        <img src="https://placehold.co/600x750/8e8b83/ffffff?text=Field+Notes" alt="Field Notes — Editorial" />
+        <figcaption class="peek-caption"><b>Field Notes</b> <span>Editorial</span></figcaption>
+      </figure>
+
+      <figure class="peek peek--left"  data-peek data-depth="1.0">
+        <img src="https://placehold.co/600x750/3a4a52/ffffff?text=Northwind" alt="Northwind — Web" />
+        <figcaption class="peek-caption"><b>Northwind</b> <span>Web platform</span></figcaption>
+      </figure>
+
+      <figure class="peek peek--right" data-peek data-depth="0.96">
+        <img src="https://placehold.co/600x750/d8c4a4/15161a?text=Mono" alt="Mono Type — Identity" />
+        <figcaption class="peek-caption"><b>Mono Type</b> <span>Identity</span></figcaption>
+      </figure>
+
+      <div class="stage-progress" data-progress></div>
+
+    </div>
+  </section>
+
+  <div class="spacer">↑ End of selected work</div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script>
+  (function () {
+    var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!window.gsap || !window.ScrollTrigger || reduce) {
+      document.body.classList.add('no-anim');
+      return;
+    }
+    gsap.registerPlugin(ScrollTrigger);
+
+    var cards = gsap.utils.toArray('[data-peek]');
+    var statement = document.querySelector('[data-statement]');
+    var progressBar = document.querySelector('[data-progress]::after') ? null : document.querySelector('[data-progress]');
+    var N = cards.length;
+
+    // each card gets an evenly-spaced phase; it is screen-centered at progress == phase
+    cards.forEach(function (c, i) { c._phase = i / N; });
+
+    var SPAN = 3.0;          // vertical spacing/speed (in viewport-heights)
+    var clamp = gsap.utils.clamp;
+
+    function place(p) {
+      var h = window.innerHeight;
+      for (var i = 0; i < N; i++) {
+        var c = cards[i];
+        var depth = parseFloat(c.dataset.depth) || 1;
+        // base conveyor position: v = signed distance from screen center (viewport-heights).
+        //   v > 0 → below center (entering)   v < 0 → above center (exiting)
+        var v = (c._phase - p) * SPAN;
+        // PARALLAX: layer each card on its own speed so light scrolls feel like
+        // the cards glide/slide past one another instead of moving as one block.
+        v *= (0.82 + depth * 0.22);              // deeper cards travel a touch faster
+        v += (depth - 1) * 0.10;                 // tiny vertical offset per layer
+        var a = Math.abs(v);
+        // fade: fully solid near center, gone by ~0.66vh away
+        var op = clamp(0, 1, 1 - (a - 0.18) / 0.48);
+        // mist: a touch of blur as it nears the edges
+        var blur = clamp(0, 7, (a - 0.24) * 12);
+        // depth → subtle scale (nearer cards a hair bigger)
+        var sc = (0.84 + (1 - Math.min(1, a)) * 0.16) * depth;
+        gsap.set(c, {
+          yPercent: -50,
+          y: v * h,
+          autoAlpha: op,
+          scale: sc,
+          filter: 'blur(' + blur.toFixed(2) + 'px)'
+        });
+      }
+    }
+
+    // scrubbed master timeline drives the pin + the misty statement
+    var tl = gsap.timeline({
+      defaults: { ease: 'none' },
+      scrollTrigger: {
+        trigger: '.projects',
+        start: 'top top',
+        end: 'bottom bottom',
+        scrub: 1.3,          // higher = more trailing glide on light scrolls
+        pin: '.projects-stage',
+        anticipatePin: 1,
+        onUpdate: function (self) {
+          place(self.progress);
+          if (progressBar) {
+            var inner = progressBar; // scale the ::after via a CSS var
+            progressBar.style.setProperty('--p', self.progress);
+          }
+        },
+        onRefresh: function (self) { place(self.progress || 0); }
+      }
+    });
+
+    // STATEMENT — mist in, hold, mist out (tied to scroll via the scrub)
+    tl.fromTo(statement,
+        { filter: 'blur(26px)', opacity: 0, scale: 1.06, letterSpacing: '0.04em' },
+        { filter: 'blur(0px)', opacity: 1, scale: 1, letterSpacing: '-0.035em', duration: 1.1, ease: 'power2.out' }, 0)
+      .to(statement, { duration: 4.6 })                                   // hold sharp
+      .to(statement, { filter: 'blur(20px)', opacity: 0, scale: 0.99, duration: 1.2, ease: 'power2.in' });
+
+    // initial paint
+    place(0);
+    gsap.set(statement, { filter: 'blur(26px)', opacity: 0 });
+
+    // keep things correct on resize / late images
+    window.addEventListener('load', function () { ScrollTrigger.refresh(); });
+    window.addEventListener('resize', function () { ScrollTrigger.refresh(); });
+  })();
+  </script>
+
+  <style>
+    /* drive the progress fill from the --p var set in JS */
+    .stage-progress::after { transform: scaleX(var(--p, 0)); }
+  </style>
+
+</body>
+</html>

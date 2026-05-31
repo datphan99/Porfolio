@@ -8,10 +8,10 @@ import Lenis from 'lenis';
 
 import Nav     from './components/Nav.jsx';
 import Hero    from './sections/Hero.jsx';
-import Showcase from './sections/Showcase.jsx';
 import Hello   from './sections/Hello.jsx';
-import Skills  from './sections/Skills.jsx';
-import Career  from './sections/Career.jsx';
+import Skills    from './sections/Skills.jsx';
+import Projects  from './sections/Projects.jsx';
+import Career    from './sections/Career.jsx';
 import { profile } from './data/portfolio.js';
 
 // Must live at module scope — never inside a component or hook
@@ -48,16 +48,24 @@ export default function App() {
   useSmoothScroll();
 
   return (
-    <div className="app-shell">
+    <div className="min-h-screen bg-[#f2f2f0]">
       <Nav />
       <Hero />
-      <Showcase />
       <Hello />
       <Skills />
+      <Projects />
       <Career />
-      <footer className="site-footer" id="contact">
+      <footer
+        className="flex justify-between items-center px-8 py-7 border-t border-black/[0.08] text-sm text-black/50"
+        id="contact"
+      >
         <span>{profile.name}</span>
-        <a href={`mailto:${profile.email}`}>Start a project ↗</a>
+        <a
+          href={`mailto:${profile.email}`}
+          className="inline-flex items-center gap-1 text-[#111] font-medium transition-opacity duration-200 hover:opacity-[0.65]"
+        >
+          Start a project ↗
+        </a>
       </footer>
     </div>
   );

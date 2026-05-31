@@ -42,33 +42,51 @@ export default function Showcase() {
   );
 
   return (
-    <section className="showcase" ref={sectionRef}>
+    <section className="pt-10 pb-20" ref={sectionRef}>
       <div className="container">
-        <div className="showcase-frame">
+        <div className="showcase-frame relative bg-[#1a1a1a] rounded-[28px] p-[22px] grid gap-[18px] shadow-[0_30px_80px_-30px_rgba(0,0,0,0.45)]">
 
-          <div className="showcase-row showcase-row--top">
+          <div className="grid grid-cols-2 gap-[18px] max-md:grid-cols-1">
             {topItems.map((item) => (
-              <figure className="showcase-card" key={item.id}>
-                {item.tag && <span className="showcase-tag">{item.tag}</span>}
+              <figure
+                className="showcase-card relative m-0 bg-white rounded-[16px] overflow-hidden aspect-[16/10]"
+                key={item.id}
+              >
+                {item.tag && (
+                  <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-black/[0.78] text-white px-[18px] py-2 rounded-full text-[13px] z-[2]">
+                    {item.tag}
+                  </span>
+                )}
                 <img
                   src={`https://placehold.co/640x400?text=Project+${item.id}`}
                   alt={item.alt}
+                  className="w-full h-full object-cover"
                 />
               </figure>
             ))}
           </div>
 
           {/* Play button sits in the seam between the two rows */}
-          <div className="showcase-play">
-            <button type="button" aria-label="Play showreel">▶</button>
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[3]">
+            <button
+              type="button"
+              aria-label="Play showreel"
+              className="w-[72px] h-[72px] rounded-full bg-white text-[#111] text-[22px] grid place-items-center shadow-[0_12px_28px_rgba(0,0,0,0.35)]"
+            >
+              ▶
+            </button>
           </div>
 
-          <div className="showcase-row showcase-row--bottom">
+          <div className="grid grid-cols-2 gap-[18px] max-md:grid-cols-1">
             {bottomItems.map((item) => (
-              <figure className="showcase-card" key={item.id}>
+              <figure
+                className="showcase-card relative m-0 bg-white rounded-[16px] overflow-hidden aspect-[16/7]"
+                key={item.id}
+              >
                 <img
                   src={`https://placehold.co/640x300?text=Project+${item.id}`}
                   alt={item.alt}
+                  className="w-full h-full object-cover"
                 />
               </figure>
             ))}

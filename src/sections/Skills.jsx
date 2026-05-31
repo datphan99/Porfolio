@@ -77,52 +77,55 @@ export default function Skills() {
   );
 
   return (
-    <section className="skills" id="skills" ref={sectionRef}>
+    <section className="pt-[60px]" id="skills" ref={sectionRef}>
       <div className="container">
-        <div className="skills-layout">
+        <div className="grid [grid-template-columns:minmax(0,520px)_300px] gap-[70px] items-start justify-between mx-[80px] max-lg:grid-cols-1 max-lg:gap-10 max-lg:mx-0">
 
-          <div className="skills-main">
-            <div className="skills-header">
-              <h2 className="skills-title">What I do <em>best</em>?</h2>
-              <p className="skills-sub">
+          <div>
+            <div className="skills-header max-w-[560px] mb-20">
+              <h2 className="text-[clamp(48px,5.6vw,80px)] font-bold tracking-[-0.03em] leading-[1.02] mt-3.5">
+                What I do <em className="not-italic text-[#ff3700]">best</em>?
+              </h2>
+              <p className="mt-[22px] text-black/50 text-[16px] max-w-[480px]">
                 I lead brands, teams, and projects — creating design, web, video,
                 and marketing solutions that help businesses grow and make a real impact.
               </p>
             </div>
 
-            <div className="skills-stack">
+            <div>
               {skills.map((skill, i) => (
                 <div
-                  className="skill-section"
+                  className="skill-section relative"
                   key={skill.id}
                   style={{ '--card-index': i }}
                 >
-                  <article className="skill-card">
-                    <div className="skill-card-inner">
-                      <span className="skill-tag">{skill.tag}</span>
-                      <h3 className="skill-name">{skill.name}</h3>
-                      <p className="skill-desc">{skill.description}</p>
-                      <ul className="skill-list">
+                  <article className="skill-card p-[18px] border border-black/[0.18] rounded-[28px] bg-transparent cursor-pointer">
+                    <div className="bg-white rounded-[22px] px-9 pt-[34px] pb-[38px] shadow-[0_1px_0_rgba(0,0,0,0.04),0_18px_40px_-28px_rgba(0,0,0,0.18)]">
+                      <span className="inline-block font-script text-[20px] text-[#111] mb-6">{skill.tag}</span>
+                      <h3 className="text-[clamp(28px,3vw,36px)] font-bold tracking-[-0.02em] leading-[1.05]">{skill.name}</h3>
+                      <p className="mt-[18px] text-black/50 text-[15px] leading-[1.5] max-w-[400px]">{skill.description}</p>
+                      <ul className="mt-[26px] grid gap-[9px] text-black/50 text-[15px] list-disc pl-[22px]">
                         {skill.items.map((item) => (
                           <li key={item}>{item}</li>
                         ))}
                       </ul>
                     </div>
-                    <div className="skill-card-overlay" />
+                    <div className="skill-card-overlay absolute inset-0 rounded-[28px] bg-white/[0.82] opacity-0 pointer-events-none z-10" />
                   </article>
                 </div>
               ))}
             </div>
           </div>
 
-          <aside className="skills-author">
+          <aside className="skills-author sticky top-[100px] aspect-[4/5] rounded-[22px] overflow-hidden bg-[#1a1a1a] max-lg:relative max-lg:top-0 max-lg:max-w-[360px]">
             <img
               src="https://placehold.co/480x600?text=Author"
               alt={`${profile.name} portrait`}
+              className="w-full h-full object-cover opacity-[0.85]"
             />
-            <div className="skills-author-meta">
-              <div className="skills-author-name">{profile.name}</div>
-              <div className="skills-author-role">{profile.role}</div>
+            <div className="absolute left-0 right-0 bottom-0 px-7 py-7 text-white [background:linear-gradient(180deg,transparent,rgba(0,0,0,0.55)_60%)]">
+              <div className="text-[26px] font-bold tracking-[-0.01em]">{profile.name}</div>
+              <div className="mt-1 text-[16px] opacity-90">{profile.role}</div>
             </div>
           </aside>
 
