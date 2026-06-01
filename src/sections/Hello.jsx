@@ -26,7 +26,7 @@ export default function Hello() {
       const section = sectionRef.current;
       const split = new SplitText(".hello-title", {
         type: "chars,words",
-        charsClass: "inline-block overflow-hidden",
+        charsClass: "hello-char inline-block overflow-hidden",
       });
 
       // Initial states — rotation baked in so Draggable can compose on top
@@ -80,7 +80,10 @@ export default function Hello() {
             ease: "power3.out",
           },
           "-=0.25",
-        );
+        )
+        // Spacer — holds the revealed state through the first ~half of the pin so the
+        // tail is free for the Skills bridge (text dissolves into particles there).
+        .to({}, { duration: 1.7 });
 
       // Draggable — spring back on release
       const draggables = Draggable.create(
@@ -113,7 +116,7 @@ export default function Hello() {
   return (
     // min-h-[250vh] tạo scroll space — stage (100vh) pins trong khi 150vh còn lại drive animation
     <section
-      className="relative min-h-[250vh] overflow-hidden"
+      className="relative min-h-[330vh] overflow-hidden"
       id="about"
       ref={sectionRef}
     >

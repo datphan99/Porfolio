@@ -237,6 +237,19 @@ export default function Skills({ canvasRef, capRef }) {
       cloudOffsetY = 0,
       cloudVel = 0;
 
+    // ── Bridge state: Hello text → particles → techstack ──
+    let introProgress = 0; // 0 = Hello text intact, 1 = fully gathered into techstack
+    let introPts = null; // {x,y} screen-space points sampled from the Hello headline
+    let charEls = null; // cached .hello-char elements
+    let dirtied = false; // whether headline styles have been mutated (needs restore)
+    const INTRO_START = 0.5; // remap: Hello pin progress 0.5→1 maps to introProgress 0→1
+
+    // Cached Hello DOM — faded out as the text dissolves into particles
+    const titleEl = document.querySelector(".hello-title");
+    const eyebrowEl = document.querySelector(".hello-eyebrow");
+    const fadeEls = gsap.utils.toArray(".hello-pill");
+    if (eyebrowEl) fadeEls.push(eyebrowEl);
+
     function curScroll() {
       const sm =
         window.ScrollSmoother && ScrollSmoother.get && ScrollSmoother.get();
@@ -261,6 +274,7 @@ export default function Skills({ canvasRef, capRef }) {
       canvas.style.width = W + "px";
       canvas.style.height = H + "px";
       ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+      introPts = null; // text position/size changed — re-sample on next bridge frame
     }
 
     function anchor() {
@@ -274,6 +288,67 @@ export default function Skills({ canvasRef, capRef }) {
 
     const tmp = [0, 0];
     const clamp = (a, b, v) => (v < a ? a : v > b ? b : v);
+
+    // Sample N points filling each character's box — the headline reads as solid
+    // ink blocks that then shatter apart into the particle cloud.
+    function sampleTextPoints() {
+      const chars = document.querySelectorAll(".hello-char");
+      if (!chars.length) return null;
+
+      const rects = [];
+      let totalArea = 0;
+      chars.forEach((c) => {
+        const r = c.getBoundingClientRect();
+        if (r.width > 0 && r.height > 0) {
+          rects.push(r);
+          totalArea += r.width * r.height;
+        }
+      });
+      if (!rects.length || totalArea <= 0) return null;
+
+      const X = new Float32Array(N),
+        Y = new Float32Array(N);
+      for (let i = 0; i < N; i++) {
+        // pick a char box weighted by area, then a random point inside it
+        let pick = Math.random() * totalArea;
+        let r = rects[0];
+        for (let j = 0; j < rects.length; j++) {
+          pick -= rects[j].width * rects[j].height;
+          if (pick <= 0) {
+            r = rects[j];
+            break;
+          }
+        }
+        X[i] = r.left + Math.random() * r.width;
+        Y[i] = r.top + Math.random() * r.height;
+      }
+      return { x: X, y: Y };
+    }
+
+    function ensureChars() {
+      if (!charEls) charEls = document.querySelectorAll(".hello-char");
+      return charEls;
+    }
+
+    // Grow a solid ink fill behind each character (alpha 0→1) and match the text
+    // colour so the glyphs disappear into solid blocks; opacity fades the lot out.
+    function setBlocks(alpha, opacity) {
+      ensureChars().forEach((c) => {
+        c.style.backgroundColor = `rgba(21,22,26,${alpha})`;
+        c.style.color = "#15161a";
+      });
+      if (titleEl) gsap.set(titleEl, { opacity });
+      dirtied = true;
+    }
+
+    function clearBlocks() {
+      ensureChars().forEach((c) => {
+        c.style.backgroundColor = "";
+        c.style.color = "";
+      });
+      if (titleEl) gsap.set(titleEl, { clearProps: "opacity" });
+      dirtied = false;
+    }
 
     function project(rx, ry, scale, rot, cx, cy, D, out) {
       const k = D / 200;
@@ -358,7 +433,32 @@ export default function Skills({ canvasRef, capRef }) {
       t += 0.022;
       updateDrift();
       if (ready) {
-        computeTargets();
+        computeTargets(); // fills TX/TY with techstack (fallback) during the bridge
+
+        // ── Bridge: dissolve the Hello headline into particles, then gather ──
+        if (introProgress > 0 && introProgress < 1) {
+          if (!introPts) introPts = sampleTextPoints();
+
+          // Phase 1 (0→0.35): ink fill grows behind the chars → solid blocks
+          // Phase 2 (0.35→0.5): the solid blocks fade out completely
+          // Phase 3 (0.55→1): particles burst from the block positions and gather
+          const bgAlpha = clamp(0, 1, introProgress / 0.35);
+          const textOpacity = 1 - clamp(0, 1, (introProgress - 0.35) / 0.15);
+          setBlocks(bgAlpha, textOpacity);
+          if (fadeEls.length) gsap.set(fadeEls, { opacity: textOpacity });
+
+          if (introPts) {
+            const blend = clamp(0, 1, (introProgress - 0.55) / 0.45);
+            for (let i = 0; i < N; i++) {
+              TX[i] = introPts.x[i] + (TX[i] - introPts.x[i]) * blend;
+              TY[i] = introPts.y[i] + (TY[i] - introPts.y[i]) * blend;
+            }
+          }
+        } else if (introProgress <= 0 && dirtied) {
+          clearBlocks(); // scrolled back above the bridge — restore the text
+          introPts = null;
+        }
+
         ctx.clearRect(0, 0, W, H);
         ctx.fillStyle = "#15161a";
         ctx.globalAlpha = 0.82;
@@ -378,17 +478,41 @@ export default function Skills({ canvasRef, capRef }) {
     window.addEventListener("resize", resize);
     raf = requestAnimationFrame(frame);
 
-    const show = () => gsap.to([canvas, capEl], { opacity: 1, duration: 0.8 });
-    const hide = () => gsap.to([canvas, capEl], { opacity: 0, duration: 0.6 });
-    const st = ScrollTrigger.create({
-      trigger: sectionRef.current,
-      markers: true,
-      start: "top 15%",
+    let visible = false;
+    function setVisible(v) {
+      if (v === visible) return;
+      visible = v;
+      gsap.to([canvas, capEl], {
+        opacity: v ? 1 : 0,
+        duration: v ? 0.6 : 0.5,
+        overwrite: "auto",
+      });
+    }
+
+    // Bridge driver — the Hello (#about) pin tail converts text → particles → techstack
+    const introTrigger = ScrollTrigger.create({
+      trigger: "#about",
+      start: "top top",
       end: "bottom bottom",
-      onEnter: show,
-      onEnterBack: show,
-      onLeave: hide,
-      onLeaveBack: hide,
+      onUpdate(self) {
+        introProgress = clamp(
+          0,
+          1,
+          (self.progress - INTRO_START) / (1 - INTRO_START),
+        );
+        if (introProgress > 0.001 && !introPts) introPts = sampleTextPoints();
+        // Particles only appear once the text/blocks have faded out completely
+        setVisible(introProgress > 0.5);
+      },
+    });
+
+    // Hide once the Skills section is fully scrolled past; restore on the way back up
+    const skillsTrigger = ScrollTrigger.create({
+      trigger: sectionRef.current,
+      start: "top bottom",
+      end: "bottom top",
+      onLeave: () => setVisible(false),
+      onEnterBack: () => setVisible(true),
     });
 
     Promise.all(
@@ -405,7 +529,10 @@ export default function Skills({ canvasRef, capRef }) {
     return () => {
       cancelAnimationFrame(raf);
       window.removeEventListener("resize", resize);
-      st.kill();
+      introTrigger.kill();
+      skillsTrigger.kill();
+      clearBlocks();
+      if (fadeEls.length) gsap.set(fadeEls, { clearProps: "opacity" });
     };
   }, [canvasRef, capRef]);
 
