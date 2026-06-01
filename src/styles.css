@@ -1,14 +1,28 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@theme {
+  --color-bg:   #f2f2f0;
+  --color-mist: #f2f2f0;
+  --color-ink:  #111111;
+  --color-dark: #0d0d0d;
+  --color-dot:  #ff3700;
+
+  --font-sans:    Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: "Inter Display", Inter, sans-serif;
+  --font-script:  Caveat, cursive;
+
+  --radius-card: 22px;
+
+  --spacing-side: clamp(24px, 6vw, 96px);
+}
 
 @layer base {
-  /* scroll-behavior: auto is intentional — Lenis owns all scroll, not the browser */
+  /* scroll-behavior: auto is intentional — ScrollSmoother owns all scroll, not the browser */
   html { scroll-behavior: auto; }
 
-  img   { @apply max-w-full block; }
-  a     { @apply text-inherit no-underline; }
-  ul    { @apply m-0 p-0 list-none; }
+  img    { @apply max-w-full block; }
+  a      { @apply text-inherit no-underline; }
+  ul     { @apply m-0 p-0 list-none; }
   h1, h2, h3, h4, p { @apply m-0; }
   button { @apply cursor-pointer border-0 bg-transparent text-inherit; font: inherit; }
 }
@@ -78,27 +92,113 @@
   z-index: calc(var(--card-index, 0) + 1);
 }
 
-/* ─── Work stack grid ───────────────────────────────
-   CSS-var transforms are animated by GSAP via
-   card.style.setProperty() — must live in CSS.       */
-.stck-el {
-  transform: translateY(var(--ypar, 0px));
+/* ─── Nav menu button hover underline ───────────────
+   Matches the prototype's right-edge "Menu" link.    */
+.nav-menu-btn::after {
+  content: ""; position: absolute; left: 0; right: 100%; bottom: -5px;
+  height: 1.5px; background: currentColor;
+  transition: right 0.32s cubic-bezier(0.22, 0.61, 0.36, 1);
 }
-.stck-el-h {
-  position: absolute;
-  inset: 0;
-  display: block;
-  overflow: hidden;
-  transform: translate(var(--trx, 0px), var(--try, 0px));
-}
-.stck-mfollow {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
+.nav-menu-btn:hover::after,
+.nav-menu-btn[aria-expanded="true"]::after { right: 0; }
+
+/* ─── Tagline frame corner ticks ────────────────────
+   Swiss detailing — two 9px L-shapes, top-left &
+   bottom-right. Cannot be done in Tailwind utilities. */
+.tagline-frame::before,
+.tagline-frame::after {
+  content: ""; position: absolute;
+  width: 9px; height: 9px;
   pointer-events: none;
-  background: radial-gradient(
-    420px circle at var(--mx, 50%) var(--my, 50%),
-    rgba(255, 255, 255, 0.13) 0%,
-    transparent 70%
-  );
+  border: 1px solid #15161a; opacity: 0.55;
 }
+.tagline-frame::before { top: 10px; left: 10px; border-right: 0; border-bottom: 0; }
+.tagline-frame::after  { bottom: 10px; right: 10px; border-left: 0; border-top: 0; }
+
+/* ─── Particle Morph (Skills) ───────────────────────
+   Canvas + caption are fixed, outside smooth-wrapper.
+   Content column sits in the right half on desktop.   */
+.particle-stage {
+  position: fixed; inset: 0; z-index: 1;
+  display: block; pointer-events: none; opacity: 0;
+}
+.shape-cap {
+  position: fixed; z-index: 2; left: 0; top: 0;
+  transform: translateX(-50%);
+  font-size: 12px; font-weight: 500;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: #9b9b97; pointer-events: none;
+  opacity: 0; transition: opacity 0.4s ease;
+  white-space: nowrap;
+}
+
+.particle-content { position: relative; z-index: 3; margin-left: 50vw; }
+
+.sect { min-height: 128vh; display: flex; align-items: center; }
+.sect-inner {
+  width: 100%;
+  display: flex; flex-direction: column; justify-content: center;
+  padding: 0 clamp(28px, 5vw, 96px) 0 24px;
+  max-width: 600px;
+}
+.sect-index {
+  font-size: 12px; font-weight: 600;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: #9b9b97; margin: 0 0 18px;
+}
+.sect-title {
+  margin: 0;
+  font-size: clamp(40px, 4.6vw, 70px);
+  font-weight: 600; letter-spacing: -0.04em; line-height: 0.98;
+}
+.sect-desc {
+  margin: 24px 0 0; max-width: 460px;
+  font-size: clamp(16px, 1.25vw, 19px);
+  font-weight: 450; line-height: 1.5;
+  letter-spacing: -0.01em; color: #45464b;
+}
+.sect-lists {
+  margin-top: clamp(34px, 5vh, 60px);
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 24px 40px; max-width: 520px;
+}
+.list-label { font-size: 13px; font-weight: 500; color: #9b9b97; margin: 0 0 14px; }
+.list-col ul { list-style: none; margin: 0; padding: 0; }
+.list-col li {
+  font-size: clamp(14px, 1vw, 16px); font-weight: 500;
+  letter-spacing: -0.01em;
+  padding: 7px 0; border-top: 1px solid rgba(0,0,0,0.10);
+}
+.list-col li:first-child { border-top: 0; }
+
+@media (max-width: 1100px) and (min-width: 821px) {
+  .particle-content { margin-left: 46vw; }
+  .sect-inner { padding: 0 clamp(24px, 4vw, 56px) 0 16px; }
+  .sect-title { font-size: clamp(36px, 5vw, 60px); }
+}
+
+@media (max-width: 820px) {
+  /* Fixed canvas + caption hidden on mobile — inline canvases used instead */
+  .particle-stage { display: none; }
+  .shape-cap      { display: none; }
+}
+
+@media (max-width: 520px) {
+  .sect-lists { grid-template-columns: 1fr; gap: 22px; }
+}
+
+/* ─── Projects parallax ─────────────────────────────
+   ScrollSmoother requires overflow:hidden on wrapper.
+   .no-anim fallback for prefers-reduced-motion.      */
+#smooth-wrapper { overflow: hidden; }
+
+.no-anim .projects        { min-height: auto; }
+.no-anim .projects-stage  { height: auto; overflow: visible; padding: 18vh 0; }
+.no-anim .statement-layer { position: static; }
+.no-anim .statement       { opacity: 1 !important; filter: none !important; }
+.no-anim .project {
+  position: relative; top: auto; left: auto; right: auto;
+  margin: 6vh clamp(24px, 6vw, 96px);
+  opacity: 1 !important; filter: none !important; transform: none !important;
+}
+.no-anim .project.is-right { margin-left: auto; }

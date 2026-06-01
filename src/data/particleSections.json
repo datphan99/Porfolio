@@ -1,0 +1,34 @@
+[
+  {
+    "shape": "techstack",
+    "index": "01 — Tech Stack",
+    "title": "Tech Stack",
+    "desc": "Everything settles into layers — a dependable system of tools and infrastructure built to last and to scale.",
+    "unlock": ["Faster Delivery", "Reliable Performance", "Easy Maintenance", "Room To Scale"],
+    "build": ["Design Systems", "Component Libraries", "Webflow / Framer", "Headless Front-ends"]
+  },
+  {
+    "shape": "creation",
+    "index": "02 — Creation",
+    "title": "Creation",
+    "desc": "We shape raw ideas into living brands — one clear thought multiplying into the first real forms.",
+    "unlock": ["A Clear Direction", "Early Momentum", "Founder Confidence", "A First Identity"],
+    "build": ["Naming & Story", "Logo Marks", "Core Identity", "Brand Foundations"]
+  },
+  {
+    "shape": "growth",
+    "index": "03 — Growth",
+    "title": "Growth",
+    "desc": "It expands outward — gathering scale, reach, and momentum as the brand earns its audience.",
+    "unlock": ["Wider Reach", "Repeat Attention", "Market Trust", "Compounding Demand"],
+    "build": ["Campaign Systems", "Content Engines", "Social Presence", "Growth Assets"]
+  },
+  {
+    "shape": "modernization",
+    "index": "04 — Modernization",
+    "title": "Modernization",
+    "desc": "We evolve outdated brands into modern systems, refining design, voice, and digital presence to feel timeless, relevant, and unmistakably clear.",
+    "unlock": ["Relevance Today", "Trust With New Audiences", "Improved Usability", "Digital Readiness"],
+    "build": ["Updated Brand Systems", "Modern Visual Identity", "Clear Digital Experiences", "Platform-Ready Assets"]
+  }
+]

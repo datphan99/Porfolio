@@ -1,145 +1,182 @@
-import { useRef } from "react";
-import { useGSAP } from "@gsap/react";
+import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { projects } from "../data/portfolio.js";
 
-const PARALLAX_SPEEDS = [60, 38, 72, 44];
+function Card({ p, i, ref }) {
+  const sideClass = i % 2 === 0 ? "is-right right-side" : "is-left left-side";
+  return (
+    <figure
+      ref={ref}
+      className={
+        `project absolute top-1/2 z-[2] rounded-[30px] ` +
+        `w-[clamp(280px,34vw,512px)] aspect-[512/570] ${sideClass} ` +
+        `[will-change:transform,opacity,filter] ` +
+        `after:content-[''] after:absolute after:-inset-px after:z-[3] ` +
+        `after:rounded-[30px] after:pointer-events-none ` +
+        `after:[box-shadow:inset_0_0_4rem_8rem_var(--color-mist)]`
+      }
+    >
+      <div className="absolute inset-0 rounded-[30px] overflow-hidden">
+        <img
+          src={p.img}
+          alt={`${p.name} — ${p.tag}`}
+          className="w-full h-full object-cover"
+        />
+      </div>
+      <figcaption
+        className={
+          `absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[4] ` +
+          `whitespace-nowrap inline-flex items-baseline gap-[0.55em] ` +
+          `px-[0.95em] py-[0.56em] rounded-full text-white ` +
+          `bg-[rgba(120,120,120,0.28)] [backdrop-filter:blur(7px)_saturate(1.3)] ` +
+          `[box-shadow:inset_0_0_0_1px_rgba(255,255,255,0.22),0_6px_20px_-10px_rgba(0,0,0,0.4)]`
+        }
+      >
+        <b className="text-[15px] font-semibold tracking-[-0.01em]">{p.name}</b>
+        <span className="text-[14px] font-normal opacity-80">{p.tag}</span>
+      </figcaption>
+    </figure>
+  );
+}
 
 export default function Projects() {
   const sectionRef = useRef(null);
-  const cardsRef = useRef([]);
+  const stageRef = useRef(null);
+  const statementRef = useRef(null);
+  const cardRefs = useRef([]);
 
-  useGSAP(
-    () => {
-      const cards = cardsRef.current.filter(Boolean);
+  useEffect(() => {
+    const reduce = window.matchMedia?.(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+    if (reduce) {
+      document.body.classList.add("no-anim");
+      return;
+    }
 
-      // Headline fade-in
-      gsap.fromTo(
-        ".work-headline",
-        { opacity: 0, y: 18 },
-        {
-          opacity: 1, y: 0, duration: 0.9, ease: "power3.out",
-          scrollTrigger: { trigger: ".work-headline", start: "top 88%", once: true },
-        }
-      );
+    const cards = cardRefs.current.filter(Boolean);
+    const N = cards.length;
+    const clamp = gsap.utils.clamp;
 
-      // Parallax per card
-      cards.forEach((card, i) => {
-        const speed = PARALLAX_SPEEDS[i % PARALLAX_SPEEDS.length];
-        ScrollTrigger.create({
-          trigger: card,
-          start: "top bottom",
-          end: "bottom top",
-          onUpdate(self) {
-            card.style.setProperty("--ypar", `${(self.progress - 0.5) * speed * -1}px`);
-          },
-        });
+    function lerp(a, b, t) {
+      return a + (b - a) * t;
+    }
+
+    const MIST_END = 0.1;
+    const FIRST = 0.14;
+    const OVERLAP = 0.66;
+    const WIN = (1 - FIRST) / ((N - 1) * OVERLAP + 1);
+    const STRIDE = OVERLAP * WIN;
+
+    function render(p) {
+      const vh = window.innerHeight;
+      const startY = 0.62 * vh;
+      const endY = -0.62 * vh;
+
+      const mp = clamp(0, 1, p / MIST_END);
+      const fadeOut = clamp(0, 1, (p - 0.95) / 0.05);
+      gsap.set(statementRef.current, {
+        opacity: mp * (1 - fadeOut),
+        filter: `blur(${((1 - mp) * 24 + fadeOut * 18).toFixed(2)}px)`,
+        scale: 1 + (1 - mp) * 0.04 - fadeOut * 0.02,
       });
 
-      // Block reveal
-      cards.forEach((card) => {
-        const reveal = card.querySelector(".stck-reveal");
-        if (!reveal) return;
-        gsap.to(reveal, {
-          scaleX: 0,
-          duration: 1.1,
-          ease: "power3.inOut",
-          scrollTrigger: { trigger: card, start: "top 80%", once: true },
-        });
-      });
-
-      // Mouse parallax + glow
-      const removers = [];
-      cards.forEach((card) => {
-        const link = card.querySelector(".stck-el-h");
-        const glow = card.querySelector(".stck-mfollow");
-
-        function onMove(e) {
-          const { left, top, width, height } = card.getBoundingClientRect();
-          const x = e.clientX - left;
-          const y = e.clientY - top;
-          link.style.setProperty("--trx", `${(x / width - 0.5) * 22}px`);
-          link.style.setProperty("--try", `${(y / height - 0.5) * 12}px`);
-          glow?.style.setProperty("--mx", `${x}px`);
-          glow?.style.setProperty("--my", `${y}px`);
+      for (let i = 0; i < N; i++) {
+        const sp = (p - (FIRST + i * STRIDE)) / WIN;
+        let y, vis;
+        if (sp <= 0) {
+          y = startY;
+          vis = 0;
+        } else if (sp >= 1) {
+          y = endY;
+          vis = 0;
+        } else {
+          y = lerp(startY, endY, sp);
+          const fin = clamp(0, 1, sp / 0.14);
+          const fout = clamp(0, 1, (1 - sp) / 0.14);
+          vis = Math.min(fin, fout);
         }
+        gsap.set(cards[i], { yPercent: -50, y, autoAlpha: vis });
+      }
+    }
 
-        function onLeave() {
-          gsap.to(link, { "--trx": "0px", "--try": "0px", duration: 0.8, ease: "power2.out", overwrite: "auto" });
-        }
+    let targetP = 0,
+      curP = 0,
+      raf;
+    function loop() {
+      curP += (targetP - curP) * 0.08;
+      if (Math.abs(targetP - curP) < 0.00015) curP = targetP;
+      render(curP);
+      raf = requestAnimationFrame(loop);
+    }
 
-        card.addEventListener("mousemove", onMove);
-        card.addEventListener("mouseleave", onLeave);
-        removers.push(() => {
-          card.removeEventListener("mousemove", onMove);
-          card.removeEventListener("mouseleave", onLeave);
-        });
-      });
+    const st = ScrollTrigger.create({
+      trigger: sectionRef.current,
+      start: "top top",
+      end: "bottom bottom",
+      pin: stageRef.current,
+      anticipatePin: 1,
+      onUpdate: (self) => {
+        targetP = self.progress;
+      },
+      onRefresh: (self) => {
+        targetP = self.progress || 0;
+      },
+    });
 
-      return () => removers.forEach((fn) => fn());
-    },
-    { scope: sectionRef }
-  );
+    render(0);
+    loop();
+
+    const onLoad = () => ScrollTrigger.refresh();
+    window.addEventListener("load", onLoad);
+
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener("load", onLoad);
+      st.kill();
+    };
+  }, []);
+
+  const mapped = projects.map((p) => ({
+    name: p.name,
+    tag: p.role,
+    img: p.imageUrl,
+  }));
 
   return (
-    <section className="pt-[120px]" id="work" ref={sectionRef}>
-      <div className="container">
-        <h2 className="work-headline font-display text-[clamp(32px,5.5vw,60px)] font-bold tracking-[-0.05em] leading-none text-[#111] opacity-0 mb-[60px]">
-          Selected work
-        </h2>
-        <div className="flex flex-col gap-[2.4rem] pb-[50vh]">
-          {projects.map((project, i) => {
-            const nth = i + 1;
-            const isOdd = nth % 2 !== 0;
-            const is3n1 = nth % 3 === 1;
+    <section
+      id="work"
+      ref={sectionRef}
+      className="projects relative min-h-[680vh]"
+    >
+      <div
+        ref={stageRef}
+        className="projects-stage relative h-screen overflow-hidden"
+      >
+        <p className="absolute top-9 inset-x-0 text-center z-[5] text-[11px] font-medium tracking-[0.24em] uppercase text-neutral-400">
+          Unforgettable experiences
+        </p>
 
-            return (
-              <div
-                key={project.id}
-                className={`stck-el aspect-[450/500] w-full relative overflow-hidden rounded-[22px]${isOdd ? " ml-auto" : ""}${is3n1 ? " max-w-[45rem]" : ""}`}
-                ref={(el) => (cardsRef.current[i] = el)}
-              >
-                <div className="stck-reveal absolute inset-0 bg-[#111] z-10 origin-left pointer-events-none" />
-                <a
-                  href={project.detailUrl}
-                  className="stck-el-h"
-                  style={{ "--trx": "0px", "--try": "0px" }}
-                >
-                  {project.videoUrl ? (
-                    <video
-                      src={project.videoUrl}
-                      autoPlay
-                      loop
-                      playsInline
-                      muted
-                      className="absolute inset-0 w-[105%] h-[105%] object-cover block"
-                    />
-                  ) : (
-                    <img
-                      src={project.imageUrl}
-                      alt={project.name}
-                      className="absolute inset-0 w-[105%] h-[105%] object-cover block"
-                    />
-                  )}
-                  <div className="stck-mfollow" />
-                  <div className="absolute bottom-6 left-6 z-[3]">
-                    <div className="inline-flex bg-[rgba(10,10,10,0.52)] backdrop-blur-sm border border-white/[0.10] rounded-full px-[18px] py-2.5">
-                      <div className="flex flex-col gap-0.5">
-                        <span className="text-[13px] font-semibold text-white tracking-[-0.01em] leading-[1.2]">
-                          {project.name}
-                        </span>
-                        <span className="text-[10px] font-medium text-white/55 tracking-[0.06em] uppercase">
-                          {project.role}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </a>
-              </div>
-            );
-          })}
+        <div className="statement-layer absolute inset-0 grid place-items-center z-[4] pointer-events-none">
+          <h2
+            ref={statementRef}
+            className="statement m-0 whitespace-nowrap font-semibold leading-none tracking-[-0.035em] text-ink text-[clamp(30px,5.4vw,62px)] [will-change:filter,opacity,transform]"
+          >
+            Unforgettable experiences
+          </h2>
         </div>
+
+        {mapped.map((p, i) => (
+          <Card
+            key={i}
+            p={p}
+            i={i}
+            ref={(el) => {
+              cardRefs.current[i] = el;
+            }}
+          />
+        ))}
       </div>
     </section>
   );

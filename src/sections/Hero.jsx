@@ -100,7 +100,7 @@ export default function Hero() {
 
   return (
     <section
-      className="relative min-h-screen pt-[190px] pb-24 text-center bg-[#f2f2f0] overflow-hidden"
+      className="relative min-h-screen pt-[105px] pb-[118px] text-center bg-[#f2f2f0] overflow-hidden"
       ref={sectionRef}
     >
       {/* Background beams — mask gradients live in styles.css */}
@@ -118,17 +118,6 @@ export default function Hero() {
         {[1, 2, 3, 4, 5].map((n) => (
           <span key={n} className={`hero-beam hero-beam--${n}`} />
         ))}
-      </div>
-
-      {/* Side tag */}
-      <div
-        className="absolute top-[26%] right-0 grid w-[62px] h-[244px] [grid-template-rows:84px_1fr] items-center justify-items-center bg-white shadow-[-10px_18px_40px_rgba(0,0,0,0.08)]"
-        aria-hidden="true"
-      >
-        <strong className="text-[28px] leading-none">W.</strong>
-        <span className="-rotate-90 text-[#0c0c0c] text-[14px] font-extrabold tracking-[0.04em] whitespace-nowrap">
-          Nominee
-        </span>
       </div>
 
       <div className="container flex flex-col items-center justify-center min-h-[calc(100vh-286px)]">
@@ -153,7 +142,7 @@ export default function Hero() {
           {/* Row 1 */}
           <span className="flex items-center justify-center gap-[clamp(18px,2.7vw,42px)] min-w-0">
             <span className="hero-word inline-block whitespace-nowrap text-[#020202]">
-              Brands
+              Make
             </span>
 
             {/* Site mockup */}
@@ -176,14 +165,14 @@ export default function Hero() {
             </span>
 
             <span className="hero-word inline-block whitespace-nowrap text-[#777] font-medium">
-              Grow
+              every pixel
             </span>
           </span>
 
           {/* Row 2 */}
           <span className="flex items-center justify-center gap-[clamp(18px,2.7vw,42px)] min-w-0 mt-[26px]">
             <span className="hero-word inline-block whitespace-nowrap text-[#777] font-medium">
-              Fast
+              Pay
             </span>
 
             {/* Dark mockup */}
@@ -195,7 +184,7 @@ export default function Hero() {
             </span>
 
             <span className="hero-word inline-block whitespace-nowrap text-[#020202]">
-              With us
+              for itself
             </span>
           </span>
         </h1>
@@ -218,7 +207,10 @@ export default function Hero() {
             ✦
           </span>
           Book a Meeting
-          <span className="hero-cta-arrow text-[24px] leading-none" aria-hidden="true">
+          <span
+            className="hero-cta-arrow text-[24px] leading-none"
+            aria-hidden="true"
+          >
             →
           </span>
         </a>
