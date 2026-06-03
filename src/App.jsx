@@ -7,7 +7,7 @@ import { Draggable } from 'gsap/Draggable';
 import { useGSAP } from '@gsap/react';
 
 import Nav     from './components/Nav.jsx';
-import Hero    from './sections/HeroTagline.jsx';
+import Hero    from './sections/HeroStatement.jsx';
 import Hello   from './sections/Hello.jsx';
 import Skills    from './sections/Skills.jsx';
 import Projects  from './sections/Projects.jsx';
@@ -39,7 +39,7 @@ export default function App() {
       <canvas ref={canvasRef} className="particle-stage" />
       <div ref={capRef} className="shape-cap" />
       <div id="smooth-wrapper">
-      <div id="smooth-content" className="min-h-screen bg-[#f2f2f0]">
+      <div id="smooth-content" className="min-h-screen bg-white">
         <Hero />
         <Hello />
         <Skills canvasRef={canvasRef} capRef={capRef} />

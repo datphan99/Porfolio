@@ -17,10 +17,22 @@ export default function Nav() {
       onUpdate(self) {
         if (self.direction === 1) {
           // scrolling down — slide up + fade out
-          gsap.to(el, { y: -14, opacity: 0, duration: 0.35, ease: 'power2.out', overwrite: 'auto' });
+          gsap.to(el, {
+            y: -14,
+            opacity: 0,
+            duration: 0.35,
+            ease: "power2.out",
+            overwrite: "auto",
+          });
         } else {
           // scrolling up — return to position
-          gsap.to(el, { y: 0, opacity: 1, duration: 0.4, ease: 'power2.out', overwrite: 'auto' });
+          gsap.to(el, {
+            y: 0,
+            opacity: 1,
+            duration: 0.4,
+            ease: "power2.out",
+            overwrite: "auto",
+          });
         }
       },
     });
@@ -39,7 +51,7 @@ export default function Nav() {
       </p>
 
       {/* Menu link — fixed right edge, vertically centred */}
-      <div className="fixed z-[60] right-[clamp(24px,4vw,56px)] top-1/2 -translate-y-1/2">
+      <div className="fixed z-[60] right-[clamp(24px,4vw,56px)] top-8 -translate-y-1/2">
         <button
           className="nav-menu-btn relative text-[13px] font-bold tracking-[0.12em] uppercase text-ink bg-transparent border-0 cursor-pointer"
           aria-label={open ? "Close menu" : "Open menu"}
@@ -85,24 +97,77 @@ export default function Nav() {
           <div
             className={`flex gap-3.5 mt-8 pt-7 border-t border-black/[0.08] transition-[opacity,translate] duration-[400ms] ease-out${open ? " opacity-100 translate-y-0 [transition-delay:0.42s]" : " opacity-0 translate-y-2 [transition-delay:0s]"}`}
           >
-            <a href={`mailto:${profile.email}`} aria-label="Email" className="w-[50px] h-[50px] rounded-full border border-black/[0.08] grid place-items-center text-black/50 transition-[background,color] duration-200 hover:bg-[#111] hover:text-white">
-              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.5">
-                <rect x="3" y="5" width="18" height="14" rx="2" /><path d="M3 7l9 6 9-6" />
+            <a
+              href={`mailto:${profile.email}`}
+              aria-label="Email"
+              className="w-[50px] h-[50px] rounded-full border border-black/[0.08] grid place-items-center text-black/50 transition-[background,color] duration-200 hover:bg-[#111] hover:text-white"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                width="20"
+                height="20"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.5"
+              >
+                <rect x="3" y="5" width="18" height="14" rx="2" />
+                <path d="M3 7l9 6 9-6" />
               </svg>
             </a>
-            <a href="#" aria-label="Instagram" className="w-[50px] h-[50px] rounded-full border border-black/[0.08] grid place-items-center text-black/50 transition-[background,color] duration-200 hover:bg-[#111] hover:text-white">
-              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.5">
-                <rect x="3" y="3" width="18" height="18" rx="5" /><circle cx="12" cy="12" r="4" />
-                <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
+            <a
+              href="#"
+              aria-label="Instagram"
+              className="w-[50px] h-[50px] rounded-full border border-black/[0.08] grid place-items-center text-black/50 transition-[background,color] duration-200 hover:bg-[#111] hover:text-white"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                width="20"
+                height="20"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.5"
+              >
+                <rect x="3" y="3" width="18" height="18" rx="5" />
+                <circle cx="12" cy="12" r="4" />
+                <circle
+                  cx="17.5"
+                  cy="6.5"
+                  r="1"
+                  fill="currentColor"
+                  stroke="none"
+                />
               </svg>
             </a>
-            <a href="#" aria-label="LinkedIn" className="w-[50px] h-[50px] rounded-full border border-black/[0.08] grid place-items-center text-black/50 transition-[background,color] duration-200 hover:bg-[#111] hover:text-white">
-              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.5">
-                <rect x="3" y="3" width="18" height="18" rx="3" /><path d="M7 10v7M7 7v.01M11 17v-4a2 2 0 0 1 4 0v4M11 10v7" />
+            <a
+              href="#"
+              aria-label="LinkedIn"
+              className="w-[50px] h-[50px] rounded-full border border-black/[0.08] grid place-items-center text-black/50 transition-[background,color] duration-200 hover:bg-[#111] hover:text-white"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                width="20"
+                height="20"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.5"
+              >
+                <rect x="3" y="3" width="18" height="18" rx="3" />
+                <path d="M7 10v7M7 7v.01M11 17v-4a2 2 0 0 1 4 0v4M11 10v7" />
               </svg>
             </a>
-            <a href="#" aria-label="Figma" className="w-[50px] h-[50px] rounded-full border border-black/[0.08] grid place-items-center text-black/50 transition-[background,color] duration-200 hover:bg-[#111] hover:text-white">
-              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.5">
+            <a
+              href="#"
+              aria-label="Figma"
+              className="w-[50px] h-[50px] rounded-full border border-black/[0.08] grid place-items-center text-black/50 transition-[background,color] duration-200 hover:bg-[#111] hover:text-white"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                width="20"
+                height="20"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.5"
+              >
                 <path d="M12 3H9a3 3 0 0 0 0 6h3m0-6h3a3 3 0 0 1 0 6h-3m0-6v6m0 0H9a3 3 0 0 0 0 6h3v-6zm0 6v3a3 3 0 1 1-3-3h3zm0-6h0a3 3 0 1 0 3 3 3 3 0 0 0-3-3z" />
               </svg>
             </a>

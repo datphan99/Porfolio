@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 @theme {
-  --color-bg:   #f2f2f0;
-  --color-mist: #f2f2f0;
+  --color-bg:   #ffffff;
+  --color-mist: #ffffff;
   --color-ink:  #111111;
   --color-dark: #0d0d0d;
   --color-dot:  #ff3700;
@@ -39,6 +39,46 @@
   --dot: #ff3700;
   --radius: 22px;
 }
+
+/* ─── Hero Statement (water-trail WebGL hero) ───────
+   Four corner registration-mark labels + animations. */
+.hs-corner {
+  position: absolute; z-index: 3;
+  --_side: clamp(22px, 4.4vw, 64px);
+}
+.hs-tl { top: var(--_side);    left:  var(--_side); }
+.hs-tr { top: var(--_side);    right: var(--_side); }
+.hs-bl { bottom: var(--_side); left:  var(--_side); }
+.hs-br { bottom: var(--_side); right: var(--_side); }
+
+@keyframes hs-pulse {
+  0%   { box-shadow: 0 0 0 0   rgba(47,184,99,.45); }
+  70%  { box-shadow: 0 0 0 7px rgba(47,184,99,0);   }
+  100% { box-shadow: 0 0 0 0   rgba(47,184,99,0);   }
+}
+.hs-dot { animation: hs-pulse 2.4s infinite; }
+
+.hs-ln {
+  display: inline-block; position: relative;
+  width: 30px; height: 1px; background: #a7a7a3; overflow: hidden;
+}
+@keyframes hs-cue {
+  0%         { transform: translateX(-120%); }
+  60%, 100%  { transform: translateX(320%);  }
+}
+.hs-ln::after {
+  content: ""; position: absolute; inset: 0; width: 40%;
+  background: #15161a; animation: hs-cue 2.4s ease-in-out infinite;
+}
+
+.hs-menu { position: relative; text-decoration: none; }
+.hs-menu::after {
+  content: ""; position: absolute;
+  left: 0; right: 100%; bottom: -4px;
+  height: 1.5px; background: currentColor;
+  transition: right 0.32s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+.hs-menu:hover::after { right: 0; }
 
 /* ─── Hero light beams ──────────────────────────────
    webkit-mask multi-stop gradients — not expressible
