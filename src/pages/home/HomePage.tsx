@@ -10,7 +10,7 @@ import { HomeStageContext } from "./HomeStageContext";
 import { useSmoothScroller } from "./useSmoothScroller";
 
 import Nav from "./sections/Nav/Nav";
-import Hero from "../../sections/HeroStatement";
+import Hero from "./sections/Hero/Hero";
 import Hello from "./sections/Hello/Hello";
 import Skills from "../../sections/Skills";
 import Projects from "./sections/Projects/Projects";
@@ -31,7 +31,7 @@ export default function HomePage() {
     <HomeStageContext.Provider value={{ canvasRef, capRef, skyRef, cursorRef }}>
       <Nav />
       {/* HeroStatement custom cursor — fixed, outside smooth-wrapper so CSS transform doesn't break it */}
-      <div ref={cursorRef} data-hs-cursor className="hs-cursor" aria-hidden="true" />
+      <div ref={cursorRef} className="hs-cursor" aria-hidden="true" />
       {/* Night sky — fixed dark layer behind the canvas; opacity scroll-driven from Skills.jsx */}
       <div ref={skyRef} data-sky className="night-sky" aria-hidden="true" />
       {/* Canvas + caption live OUTSIDE smooth-wrapper so position:fixed works correctly */}
