@@ -2,10 +2,10 @@ import { useRef } from 'react';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { careerEntries } from '../data/portfolio.js';
+import { careerEntries } from '../data/portfolio';
 
 export default function Career() {
-  const sectionRef = useRef(null);
+  const sectionRef = useRef<HTMLElement>(null);
 
   useGSAP(
     () => {
