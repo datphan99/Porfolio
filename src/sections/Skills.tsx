@@ -1,11 +1,14 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type RefObject } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { ScrollSmoother } from "gsap/ScrollSmoother";
-import sections from "../data/particleSections.json";
+import sectionsData from "../data/particleSections.json";
+import type { ParticleSection } from "../types";
+
+const sections = sectionsData as ParticleSection[];
 
 // ── SVG glyphs ────────────────────────────────────────────────────────────────
-const SVGS = {
+const SVGS: Record<string, string> = {
   one: '<circle cx="100" cy="100" r="60" fill="#000"/>',
   creation:
     '<circle cx="100" cy="70" r="34" fill="#000"/>' +
@@ -26,7 +29,7 @@ const SVGS = {
     '<path d="M100 150 L156 178 L100 206 L44 178 Z"/></g>',
 };
 
-const LABELS = {
+const LABELS: Record<string, string> = {
   creation: "Idea → Forms",
   growth: "Reach",
   modernization: "Renewal",
@@ -35,7 +38,7 @@ const LABELS = {
 const SHAPE_KEYS = ["one", "creation", "growth", "modernization", "techstack"];
 
 // ── Shared helpers ────────────────────────────────────────────────────────────
-function sample(frag) {
+function sample(frag: string): Promise<number[]> {
   return new Promise((resolve) => {
     const svg =
       '<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200">' +
@@ -50,6 +53,11 @@ function sample(frag) {
       cv.width = S;
       cv.height = S;
       const c = cv.getContext("2d");
+      if (!c) {
+        URL.revokeObjectURL(url);
+        resolve([]);
+        return;
+      }
       c.drawImage(img, 0, 0, S, S);
       const d = c.getImageData(0, 0, S, S).data,
         pool = [];
@@ -67,7 +75,7 @@ function sample(frag) {
   });
 }
 
-function shuffle(pool) {
+function shuffle(pool: number[]): number[] {
   const n = pool.length / 2;
   for (let i = n - 1; i > 0; i--) {
     const j = (Math.random() * (i + 1)) | 0;
@@ -81,7 +89,7 @@ function shuffle(pool) {
   return pool;
 }
 
-function toN(pool, N) {
+function toN(pool: number[], N: number): { x: Float32Array; y: Float32Array } {
   const X = new Float32Array(N),
     Y = new Float32Array(N);
   const n = pool.length / 2 || 1;
@@ -95,22 +103,28 @@ function toN(pool, N) {
 
 // ── Mobile: inline canvas per section ────────────────────────────────────────
 // Each MobileSection runs its own small RAF loop — static target shape + idle shimmer.
-function MobileSection({ s }) {
-  const canvasRef = useRef(null);
+function MobileSection({ s }: { s: ParticleSection }) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
     const ctx = canvas.getContext("2d");
-    const DPR = Math.min(2, window.devicePixelRatio || 1);
-    const size = canvas.offsetWidth || 280;
+    if (!ctx) return;
 
-    canvas.width = size * DPR;
-    canvas.height = size * DPR;
-    canvas.style.width = size + "px";
-    canvas.style.height = size + "px";
-    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    // Alias narrowed non-null values so closures can reference them safely
+    const cv = canvas;
+    const context = ctx;
+
+    const DPR = Math.min(2, window.devicePixelRatio || 1);
+    const size = cv.offsetWidth || 280;
+
+    cv.width = size * DPR;
+    cv.height = size * DPR;
+    cv.style.width = size + "px";
+    cv.style.height = size + "px";
+    context.setTransform(DPR, 0, 0, DPR, 0, 0);
 
     const N = 420;
     const cx = size / 2,
@@ -123,9 +137,9 @@ function MobileSection({ s }) {
     const TX = new Float32Array(N),
       TY = new Float32Array(N);
     let t = 0,
-      raf;
+      raf: number;
 
-    function project(rx, ry) {
+    function project(rx: number, ry: number): [number, number] {
       const k = D / 200;
       return [cx + (rx - 100) * k, cy + (ry - 100) * k];
     }
@@ -144,16 +158,16 @@ function MobileSection({ s }) {
 
       function frame() {
         t += 0.022;
-        ctx.clearRect(0, 0, size, size);
-        ctx.fillStyle = "#15161a";
-        ctx.globalAlpha = 0.82;
+        context.clearRect(0, 0, size, size);
+        context.fillStyle = "#15161a";
+        context.globalAlpha = 0.82;
         for (let i = 0; i < N; i++) {
           // Lively idle shimmer — higher amplitude than desktop
           const jx = Math.cos(t * 0.9 + seed[i]) * 4.5;
           const jy = Math.sin(t * 1.15 + seed[i] * 1.4) * 4.5;
           px[i] += (TX[i] + jx - px[i]) * 0.09;
           py[i] += (TY[i] + jy - py[i]) * 0.09;
-          ctx.fillRect(px[i] - 0.75, py[i] - 0.75, 1.5, 1.5);
+          context.fillRect(px[i] - 0.75, py[i] - 0.75, 1.5, 1.5);
         }
         raf = requestAnimationFrame(frame);
       }
@@ -196,9 +210,14 @@ function MobileSection({ s }) {
 }
 
 // ── Desktop: fixed canvas morph ───────────────────────────────────────────────
-export default function Skills({ canvasRef, capRef }) {
-  const sectionRef = useRef(null);
-  const sectRefs = useRef([]);
+interface SkillsProps {
+  canvasRef: RefObject<HTMLCanvasElement | null>;
+  capRef: RefObject<HTMLDivElement | null>;
+}
+
+export default function Skills({ canvasRef, capRef }: SkillsProps) {
+  const sectionRef = useRef<HTMLElement>(null);
+  const sectRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -206,6 +225,15 @@ export default function Skills({ canvasRef, capRef }) {
     if (!canvas || !capEl) return;
 
     const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    // Alias narrowed non-null values so closures (resize, frame, computeTargets)
+    // can reference them without TypeScript complaining they might be null.
+    const cv = canvas;
+    const cap = capEl;
+    const context = ctx;
+
+    const skyEl = document.querySelector<HTMLElement>("[data-sky]");
     const DPR = Math.min(2, window.devicePixelRatio || 1);
     let W = 0,
       H = 0;
@@ -229,25 +257,45 @@ export default function Skills({ canvasRef, capRef }) {
       seed[i] = Math.random() * 6.283;
     }
 
-    const SH = {};
+    // ── Starfield targets (Projects) ──
+    // Particles scatter from the techstack shape into a full-viewport star
+    // field. SX/SY (set in resize) are absolute viewport positions; the rest
+    // are per-star constants giving varied size + an independent twinkle.
+    const SX = new Float32Array(N),
+      SY = new Float32Array(N);
+    const sSize = new Float32Array(N),
+      sTw = new Float32Array(N),
+      sTwSpd = new Float32Array(N),
+      sBright = new Float32Array(N);
+    for (let i = 0; i < N; i++) {
+      sSize[i] = 0.6 + Math.random() * Math.random() * 1.7; // mostly small, a few large
+      sTw[i] = Math.random() * 6.283;
+      sTwSpd[i] = 0.5 + Math.random() * 1.6;
+      sBright[i] = 0.32 + Math.random() * 0.68;
+    }
+
+    const SH: Record<string, { x: Float32Array; y: Float32Array }> = {};
     let ready = false,
       t = 0,
-      raf;
-    let prevScroll = null,
+      raf: number;
+    let prevScroll: number | null = null,
       cloudOffsetY = 0,
       cloudVel = 0;
+    let enterP = 0, // 0→1 burst-in as Projects scrolls into view
+      spanP = 0, // 0→1 across the pinned Projects span
+      darkOn = false; // tracks the body.is-dark toggle
 
     // ── Bridge state: Hello text → particles → techstack ──
     let introProgress = 0; // 0 = Hello text intact, 1 = fully gathered into techstack
-    let introPts = null; // {x,y} screen-space points sampled from the Hello headline
-    let charEls = null; // cached .hello-char elements
+    let introPts: { x: Float32Array; y: Float32Array } | null = null; // {x,y} screen-space points sampled from the Hello headline
+    let charEls: NodeListOf<HTMLElement> | null = null; // cached .hello-char elements
     let dirtied = false; // whether headline styles have been mutated (needs restore)
     const INTRO_START = 0.5; // remap: Hello pin progress 0.5→1 maps to introProgress 0→1
 
     // Cached Hello DOM — faded out as the text dissolves into particles
-    const titleEl = document.querySelector(".hello-title");
-    const eyebrowEl = document.querySelector(".hello-eyebrow");
-    const fadeEls = gsap.utils.toArray(".hello-pill");
+    const titleEl = document.querySelector<HTMLElement>(".hello-title");
+    const eyebrowEl = document.querySelector<HTMLElement>(".hello-eyebrow");
+    const fadeEls = gsap.utils.toArray<Element>(".hello-pill");
     if (eyebrowEl) fadeEls.push(eyebrowEl);
 
     function curScroll() {
@@ -269,12 +317,16 @@ export default function Skills({ canvasRef, capRef }) {
     function resize() {
       W = window.innerWidth;
       H = window.innerHeight;
-      canvas.width = W * DPR;
-      canvas.height = H * DPR;
-      canvas.style.width = W + "px";
-      canvas.style.height = H + "px";
-      ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+      cv.width = W * DPR;
+      cv.height = H * DPR;
+      cv.style.width = W + "px";
+      cv.style.height = H + "px";
+      context.setTransform(DPR, 0, 0, DPR, 0, 0);
       introPts = null; // text position/size changed — re-sample on next bridge frame
+      for (let i = 0; i < N; i++) {
+        SX[i] = Math.random() * W;
+        SY[i] = Math.random() * H;
+      }
     }
 
     function anchor() {
@@ -287,7 +339,7 @@ export default function Skills({ canvasRef, capRef }) {
     }
 
     const tmp = [0, 0];
-    const clamp = (a, b, v) => (v < a ? a : v > b ? b : v);
+    const clamp = (a: number, b: number, v: number) => (v < a ? a : v > b ? b : v);
 
     // Sample N points filling each character's box — the headline reads as solid
     // ink blocks that then shatter apart into the particle cloud.
@@ -295,7 +347,7 @@ export default function Skills({ canvasRef, capRef }) {
       const chars = document.querySelectorAll(".hello-char");
       if (!chars.length) return null;
 
-      const rects = [];
+      const rects: DOMRect[] = [];
       let totalArea = 0;
       chars.forEach((c) => {
         const r = c.getBoundingClientRect();
@@ -326,13 +378,13 @@ export default function Skills({ canvasRef, capRef }) {
     }
 
     function ensureChars() {
-      if (!charEls) charEls = document.querySelectorAll(".hello-char");
+      if (!charEls) charEls = document.querySelectorAll<HTMLElement>(".hello-char");
       return charEls;
     }
 
     // Grow a solid ink fill behind each character (alpha 0→1) and match the text
     // colour so the glyphs disappear into solid blocks; opacity fades the lot out.
-    function setBlocks(alpha, opacity) {
+    function setBlocks(alpha: number, opacity: number) {
       ensureChars().forEach((c) => {
         c.style.backgroundColor = `rgba(21,22,26,${alpha})`;
         c.style.color = "#15161a";
@@ -350,7 +402,7 @@ export default function Skills({ canvasRef, capRef }) {
       dirtied = false;
     }
 
-    function project(rx, ry, scale, rot, cx, cy, D, out) {
+    function project(rx: number, ry: number, scale: number, rot: number, cx: number, cy: number, D: number, out: number[]) {
       const k = D / 200;
       const dx = (rx - 100) * scale,
         dy = (ry - 100) * scale;
@@ -366,14 +418,14 @@ export default function Skills({ canvasRef, capRef }) {
         cy = a.cy + cloudOffsetY,
         D = a.D;
       const midY = H / 2;
-      const sects = sectRefs.current.filter(Boolean);
-      let active = null,
+      const sects = sectRefs.current.filter((el): el is HTMLDivElement => el !== null);
+      let active: string | null = null,
         lp = 0;
 
       for (let s = 0; s < sects.length; s++) {
         const r = sects[s].getBoundingClientRect();
         if (r.top <= midY && r.bottom >= midY) {
-          active = sects[s].dataset.shape;
+          active = sects[s].dataset.shape ?? null;
           lp = clamp(0, 1, (midY - r.top) / r.height);
           break;
         }
@@ -424,14 +476,32 @@ export default function Skills({ canvasRef, capRef }) {
         }
       }
 
-      capEl.style.left = cx + "px";
-      capEl.style.top = cy + D * 0.58 + "px";
-      capEl.textContent = LABELS[active] || "";
+      cap.style.left = cx + "px";
+      cap.style.top = cy + D * 0.58 + "px";
+      cap.textContent = (active && LABELS[active]) || "";
     }
 
     function frame() {
       t += 0.022;
       updateDrift();
+
+      // ── Phase mix: techstack shape (Skills) → starfield (Projects) ──
+      const entered = spanP > 0.0001;
+      const exitRamp = clamp(0, 1, (spanP - 0.88) / 0.12); // night lifts near the end
+      const base = entered ? 1 : enterP;
+      const sc = base * base * (3 - 2 * base); // smoothstep — punchy burst
+      const dark = base * (1 - exitRamp); // night-sky opacity
+      const bridgeIn = clamp(0, 1, (introProgress - 0.4) / 0.22);
+      const canvasOpacity = bridgeIn * (1 - exitRamp);
+
+      // Drive the fixed night-sky layer + adaptive nav colour
+      if (skyEl) skyEl.style.opacity = dark.toFixed(3);
+      const wantDark = dark > 0.5;
+      if (wantDark !== darkOn) {
+        darkOn = wantDark;
+        document.body.classList.toggle("is-dark", wantDark);
+      }
+
       if (ready) {
         computeTargets(); // fills TX/TY with techstack (fallback) during the bridge
 
@@ -459,17 +529,36 @@ export default function Skills({ canvasRef, capRef }) {
           introPts = null;
         }
 
-        ctx.clearRect(0, 0, W, H);
-        ctx.fillStyle = "#15161a";
-        ctx.globalAlpha = 0.82;
+        // Particle colour blends ink → cool star-light as the cloud scatters
+        const cr = (21 + (232 - 21) * sc) | 0;
+        const cg = (22 + (236 - 22) * sc) | 0;
+        const cb = (26 + (245 - 26) * sc) | 0;
+        context.clearRect(0, 0, W, H);
+        context.fillStyle = `rgb(${cr},${cg},${cb})`;
+        cv.style.opacity = canvasOpacity.toFixed(3);
+
         for (let i = 0; i < N; i++) {
-          // More lively idle shimmer — higher amplitude and frequency
-          const jx = Math.cos(t * 0.9 + seed[i]) * 4.5;
-          const jy = Math.sin(t * 1.15 + seed[i] * 1.4) * 4.5;
-          px[i] += (TX[i] + jx - px[i]) * 0.09;
-          py[i] += (TY[i] + jy - py[i]) * 0.09;
-          ctx.fillRect(px[i] - 0.75, py[i] - 0.75, 1.5, 1.5);
+          // shape target (TX/TY) → scattered star target (SX/SY)
+          const tx = TX[i] + (SX[i] - TX[i]) * sc;
+          const ty = TY[i] + (SY[i] - TY[i]) * sc;
+          // shape shimmer fades out; a gentle star drift fades in
+          const jx = Math.cos(t * 0.9 + seed[i]) * 4.5 * (1 - sc);
+          const jy = Math.sin(t * 1.15 + seed[i] * 1.4) * 4.5 * (1 - sc);
+          const dx = Math.cos(t * 0.25 + sTw[i]) * 7 * sc;
+          const dy = Math.sin(t * 0.21 + sTw[i] * 1.3) * 7 * sc;
+          px[i] += (tx + jx + dx - px[i]) * 0.09;
+          py[i] += (ty + jy + dy - py[i]) * 0.09;
+
+          // flat ink alpha in the shape; per-star twinkle once scattered
+          const tw = sBright[i] * (0.55 + 0.45 * Math.sin(t * sTwSpd[i] + sTw[i]));
+          context.globalAlpha = 0.82 + (tw - 0.82) * sc;
+          const rad = 0.75 + (sSize[i] - 0.75) * sc;
+          context.fillRect(px[i] - rad, py[i] - rad, rad * 2, rad * 2);
         }
+        context.globalAlpha = 1;
+
+        // Shape caption fades out as the cloud bursts into stars
+        cap.style.opacity = (canvasOpacity * (1 - sc)).toFixed(3);
       }
       raf = requestAnimationFrame(frame);
     }
@@ -477,17 +566,6 @@ export default function Skills({ canvasRef, capRef }) {
     resize();
     window.addEventListener("resize", resize);
     raf = requestAnimationFrame(frame);
-
-    let visible = false;
-    function setVisible(v) {
-      if (v === visible) return;
-      visible = v;
-      gsap.to([canvas, capEl], {
-        opacity: v ? 1 : 0,
-        duration: v ? 0.6 : 0.5,
-        overwrite: "auto",
-      });
-    }
 
     // Bridge driver — the Hello (#about) pin tail converts text → particles → techstack
     const introTrigger = ScrollTrigger.create({
@@ -501,18 +579,32 @@ export default function Skills({ canvasRef, capRef }) {
           (self.progress - INTRO_START) / (1 - INTRO_START),
         );
         if (introProgress > 0.001 && !introPts) introPts = sampleTextPoints();
-        // Particles only appear once the text/blocks have faded out completely
-        setVisible(introProgress > 0.5);
       },
     });
 
-    // Hide once the Skills section is fully scrolled past; restore on the way back up
-    const skillsTrigger = ScrollTrigger.create({
-      trigger: sectionRef.current,
-      start: "top bottom",
-      end: "bottom top",
-      onLeave: () => setVisible(false),
-      onEnterBack: () => setVisible(true),
+    // Burst — as the Projects section scrolls in, particles scatter from the
+    // techstack shape into a full-viewport starfield (enterP 0→1).
+    const burstTrigger = ScrollTrigger.create({
+      trigger: "#work",
+      start: "top 75%",
+      end: "top top",
+      onUpdate(self) {
+        enterP = self.progress;
+      },
+    });
+
+    // Hold/exit — track progress across the pinned Projects span so the night
+    // sky stays dark, then lifts back to white near the end (exitRamp).
+    const spanTrigger = ScrollTrigger.create({
+      trigger: "#work",
+      start: "top top",
+      end: "bottom bottom",
+      onUpdate(self) {
+        spanP = self.progress;
+      },
+      onRefresh(self) {
+        spanP = self.progress || 0;
+      },
     });
 
     Promise.all(
@@ -530,9 +622,12 @@ export default function Skills({ canvasRef, capRef }) {
       cancelAnimationFrame(raf);
       window.removeEventListener("resize", resize);
       introTrigger.kill();
-      skillsTrigger.kill();
+      burstTrigger.kill();
+      spanTrigger.kill();
       clearBlocks();
       if (fadeEls.length) gsap.set(fadeEls, { clearProps: "opacity" });
+      if (skyEl) skyEl.style.opacity = "";
+      document.body.classList.remove("is-dark");
     };
   }, [canvasRef, capRef]);
 
@@ -545,7 +640,7 @@ export default function Skills({ canvasRef, capRef }) {
             key={s.shape}
             className="sect"
             data-shape={s.shape}
-            ref={(el) => {
+            ref={(el: HTMLDivElement | null) => {
               sectRefs.current[i] = el;
             }}
           >
