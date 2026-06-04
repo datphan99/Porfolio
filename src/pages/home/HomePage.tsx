@@ -12,7 +12,7 @@ import { useSmoothScroller } from "./useSmoothScroller";
 import Nav from "./sections/Nav/Nav";
 import Hero from "./sections/Hero/Hero";
 import Hello from "./sections/Hello/Hello";
-import Skills from "../../sections/Skills";
+import Skills from "./sections/Skills/Skills";
 import Projects from "./sections/Projects/Projects";
 import Career from "./sections/Career/Career";
 import { profile } from "../../data/portfolio";
@@ -33,7 +33,7 @@ export default function HomePage() {
       {/* HeroStatement custom cursor — fixed, outside smooth-wrapper so CSS transform doesn't break it */}
       <div ref={cursorRef} className="hs-cursor" aria-hidden="true" />
       {/* Night sky — fixed dark layer behind the canvas; opacity scroll-driven from Skills.jsx */}
-      <div ref={skyRef} data-sky className="night-sky" aria-hidden="true" />
+      <div ref={skyRef} className="night-sky" aria-hidden="true" />
       {/* Canvas + caption live OUTSIDE smooth-wrapper so position:fixed works correctly */}
       <canvas ref={canvasRef} className="particle-stage" />
       <div ref={capRef} className="shape-cap" />
@@ -41,7 +41,7 @@ export default function HomePage() {
       <div id="smooth-content" className="min-h-screen">
         <Hero />
         <Hello />
-        <Skills canvasRef={canvasRef} capRef={capRef} />
+        <Skills />
         <Projects />
         <Career />
         <footer
