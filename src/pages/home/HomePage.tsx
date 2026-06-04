@@ -9,7 +9,7 @@ import { useGSAP } from "@gsap/react";
 import { HomeStageContext } from "./HomeStageContext";
 import { useSmoothScroller } from "./useSmoothScroller";
 
-import Nav from "../../components/Nav";
+import Nav from "./sections/Nav/Nav";
 import Hero from "../../sections/HeroStatement";
 import Hello from "../../sections/Hello";
 import Skills from "../../sections/Skills";
