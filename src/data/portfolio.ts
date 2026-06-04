@@ -200,4 +200,4 @@ export const projects: Project[] = [
   },
 ];
 
-export const services: never[] = [];
+export const services: unknown[] = [];
