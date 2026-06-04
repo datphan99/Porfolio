@@ -4,11 +4,11 @@ import gsap from "gsap";
 import { SplitText } from "gsap/SplitText";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Draggable } from "gsap/Draggable";
-import { helloPills } from "../data/portfolio.js";
+import { helloPills } from "../data/portfolio";
 
-const PILL_ROTATIONS = { a: -3, b: 2, c: -2, d: 3, e: -2, f: 2 };
+const PILL_ROTATIONS: Record<string, number> = { a: -3, b: 2, c: -2, d: 3, e: -2, f: 2 };
 
-const PILL_POSITIONS = {
+const PILL_POSITIONS: Record<string, string> = {
   a: "left-0 top-[18%]",
   b: "left-[40px] top-[42%]",
   c: "left-[14px] top-[66%]",
@@ -18,12 +18,13 @@ const PILL_POSITIONS = {
 };
 
 export default function Hello() {
-  const sectionRef = useRef(null);
-  const stageRef = useRef(null);
+  const sectionRef = useRef<HTMLElement>(null);
+  const stageRef = useRef<HTMLDivElement>(null);
 
   useGSAP(
     () => {
       const section = sectionRef.current;
+      if (!section) return;
       const split = new SplitText(".hello-title", {
         type: "chars,words",
         charsClass: "hello-char inline-block overflow-hidden",
@@ -36,7 +37,7 @@ export default function Hello() {
         const id = [...el.classList]
           .find((c) => c.startsWith("hello-pill--"))
           ?.replace("hello-pill--", "");
-        gsap.set(el, { opacity: 0, y: 12, rotation: PILL_ROTATIONS[id] ?? 0 });
+        gsap.set(el, { opacity: 0, y: 12, rotation: id ? PILL_ROTATIONS[id] ?? 0 : 0 });
       });
 
       // Pin the stage, scroll space comes from section's min-h
@@ -90,10 +91,10 @@ export default function Hello() {
         section.querySelectorAll(".hello-pill"),
         {
           type: "x,y",
-          onDragStart() {
+          onDragStart(this: Draggable) {
             gsap.killTweensOf(this.target);
           },
-          onDragEnd() {
+          onDragEnd(this: Draggable) {
             gsap.to(this.target, {
               x: 0,
               y: 0,
