@@ -6,20 +6,20 @@ import { SplitText } from 'gsap/SplitText';
 import { Draggable } from 'gsap/Draggable';
 import { useGSAP } from '@gsap/react';
 
-import Nav     from './components/Nav.jsx';
-import Hero    from './sections/HeroStatement.jsx';
-import Hello   from './sections/Hello.jsx';
-import Skills    from './sections/Skills.jsx';
-import Projects  from './sections/Projects.jsx';
-import Career    from './sections/Career.jsx';
-import { profile } from './data/portfolio.js';
+import Nav     from './components/Nav';
+import Hero    from './sections/HeroStatement';
+import Hello   from './sections/Hello';
+import Skills    from './sections/Skills';
+import Projects  from './sections/Projects';
+import Career    from './sections/Career';
+import { profile } from './data/portfolio';
 
 // Must live at module scope — never inside a component or hook
 gsap.registerPlugin(ScrollTrigger, ScrollSmoother, SplitText, Draggable, useGSAP);
 
 export default function App() {
-  const canvasRef = useRef(null);
-  const capRef    = useRef(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const capRef    = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const smoother = ScrollSmoother.create({
@@ -37,11 +37,13 @@ export default function App() {
       <Nav />
       {/* HeroStatement custom cursor — fixed, outside smooth-wrapper so CSS transform doesn't break it */}
       <div data-hs-cursor className="hs-cursor" aria-hidden="true" />
+      {/* Night sky — fixed dark layer behind the canvas; opacity scroll-driven from Skills.jsx */}
+      <div data-sky className="night-sky" aria-hidden="true" />
       {/* Canvas + caption live OUTSIDE smooth-wrapper so position:fixed works correctly */}
       <canvas ref={canvasRef} className="particle-stage" />
       <div ref={capRef} className="shape-cap" />
       <div id="smooth-wrapper">
-      <div id="smooth-content" className="min-h-screen bg-white">
+      <div id="smooth-content" className="min-h-screen">
         <Hero />
         <Hello />
         <Skills canvasRef={canvasRef} capRef={capRef} />
