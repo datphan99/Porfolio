@@ -1,11 +1,11 @@
 import { useState, useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { navLinks, profile } from "../data/portfolio.js";
+import { navLinks, profile } from "../data/portfolio";
 
 export default function Nav() {
   const [open, setOpen] = useState(false);
-  const eyebrowRef = useRef(null);
+  const eyebrowRef = useRef<HTMLParagraphElement>(null);
 
   useEffect(() => {
     const el = eyebrowRef.current;
@@ -48,7 +48,7 @@ export default function Nav() {
       {/* Eyebrow — fixed top-centre, hides on scroll down */}
       <p
         ref={eyebrowRef}
-        className="fixed z-[60] top-7 inset-x-0 text-center text-[11px] font-bold tracking-[0.18em] uppercase text-ink pointer-events-none select-none"
+        className="nav-eyebrow fixed z-[60] top-7 inset-x-0 text-center text-[11px] font-bold tracking-[0.18em] uppercase text-ink pointer-events-none select-none"
       >
         {profile.role}
       </p>
