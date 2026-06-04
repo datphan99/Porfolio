@@ -71,24 +71,28 @@ const FRAG = [
 ].join("\n");
 
 export default function HeroStatement() {
-  const sectionRef = useRef(null);
-  const canvasRef = useRef(null);
+  const sectionRef = useRef<HTMLElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
     const section = sectionRef.current;
     const canvas = canvasRef.current;
-    const curEl = document.querySelector("[data-hs-cursor]");
+    const curEl = document.querySelector<HTMLElement>("[data-hs-cursor]");
     if (!section || !canvas) return;
+
+    // section and canvas are non-null from here on
+    const sec = section;
+    const cvs = canvas;
 
     const DPR = Math.min(2, window.devicePixelRatio || 1);
     const INK = "#15161a";
 
     const tex2d = document.createElement("canvas");
-    const t2 = tex2d.getContext("2d");
+    const t2 = tex2d.getContext("2d")!;
     let logoU = 0.62,
       logoV = 0.46;
 
-    function drawLogo(cx, cy, s) {
+    function drawLogo(cx: number, cy: number, s: number) {
       const cell = s * 0.42,
         gap = s * 0.16;
       const x0 = cx - (cell * 2 + gap) / 2;
@@ -109,8 +113,8 @@ export default function HeroStatement() {
     }
 
     function drawText() {
-      const w = section.clientWidth,
-        h = section.clientHeight;
+      const w = sec.clientWidth,
+        h = sec.clientHeight;
       if (!w || !h) return;
       tex2d.width = Math.round(w * DPR);
       tex2d.height = Math.round(h * DPR);
@@ -120,9 +124,9 @@ export default function HeroStatement() {
       t2.textAlign = "left";
       t2.textBaseline = "alphabetic";
 
-      function setFont(px) {
+      function setFont(px: number) {
         t2.font = `600 ${px}px "Saira", sans-serif`;
-        if ("letterSpacing" in t2) t2.letterSpacing = `${px * TRACK_EM}px`;
+        if ("letterSpacing" in t2) (t2 as CanvasRenderingContext2D & { letterSpacing: string }).letterSpacing = `${px * TRACK_EM}px`;
       }
 
       setFont(100);
@@ -159,13 +163,13 @@ export default function HeroStatement() {
     }
 
     // ── WebGL init ────────────────────────────────────────
-    const gl = canvas.getContext("webgl", {
+    const gl = cvs.getContext("webgl", {
       premultipliedAlpha: false,
       antialias: true,
     });
 
     if (!gl) {
-      canvas.replaceWith(tex2d);
+      cvs.replaceWith(tex2d);
       Object.assign(tex2d.style, {
         position: "absolute",
         inset: "0",
@@ -175,69 +179,72 @@ export default function HeroStatement() {
         display: "block",
       });
       const ro = new ResizeObserver(() => document.fonts.ready.then(drawText));
-      ro.observe(section);
+      ro.observe(sec);
       document.fonts.ready.then(drawText);
       return () => ro.disconnect();
     }
 
-    function compile(type, src) {
-      const s = gl.createShader(type);
-      gl.shaderSource(s, src);
-      gl.compileShader(s);
-      if (!gl.getShaderParameter(s, gl.COMPILE_STATUS))
-        console.error("[HeroStatement] shader:", gl.getShaderInfoLog(s));
+    // gl is non-null from here on (guard above returned if null)
+    const GL = gl;
+
+    function compile(type: number, src: string) {
+      const s = GL.createShader(type)!;
+      GL.shaderSource(s, src);
+      GL.compileShader(s);
+      if (!GL.getShaderParameter(s, GL.COMPILE_STATUS))
+        console.error("[HeroStatement] shader:", GL.getShaderInfoLog(s));
       return s;
     }
 
-    const prog = gl.createProgram();
-    gl.attachShader(prog, compile(gl.VERTEX_SHADER, VERT));
-    gl.attachShader(prog, compile(gl.FRAGMENT_SHADER, FRAG));
-    gl.linkProgram(prog);
-    if (!gl.getProgramParameter(prog, gl.LINK_STATUS))
-      console.error("[HeroStatement] link:", gl.getProgramInfoLog(prog));
-    gl.useProgram(prog);
+    const prog = GL.createProgram()!;
+    GL.attachShader(prog, compile(GL.VERTEX_SHADER, VERT));
+    GL.attachShader(prog, compile(GL.FRAGMENT_SHADER, FRAG));
+    GL.linkProgram(prog);
+    if (!GL.getProgramParameter(prog, GL.LINK_STATUS))
+      console.error("[HeroStatement] link:", GL.getProgramInfoLog(prog));
+    GL.useProgram(prog);
 
-    const vbuf = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, vbuf);
-    gl.bufferData(
-      gl.ARRAY_BUFFER,
+    const vbuf = GL.createBuffer()!;
+    GL.bindBuffer(GL.ARRAY_BUFFER, vbuf);
+    GL.bufferData(
+      GL.ARRAY_BUFFER,
       new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]),
-      gl.STATIC_DRAW,
+      GL.STATIC_DRAW,
     );
-    const aPos = gl.getAttribLocation(prog, "aPos");
-    gl.enableVertexAttribArray(aPos);
-    gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
+    const aPos = GL.getAttribLocation(prog, "aPos");
+    GL.enableVertexAttribArray(aPos);
+    GL.vertexAttribPointer(aPos, 2, GL.FLOAT, false, 0, 0);
 
-    const uTime = gl.getUniformLocation(prog, "uTime");
-    const uAsp = gl.getUniformLocation(prog, "uAspect");
-    const uLogoL = gl.getUniformLocation(prog, "uLogo");
-    const uTrl = gl.getUniformLocation(prog, "uTrail");
-    const uRevealL = gl.getUniformLocation(prog, "uReveal");
-    const uBreathL = gl.getUniformLocation(prog, "uBreath");
+    const uTime = GL.getUniformLocation(prog, "uTime");
+    const uAsp = GL.getUniformLocation(prog, "uAspect");
+    const uLogoL = GL.getUniformLocation(prog, "uLogo");
+    const uTrl = GL.getUniformLocation(prog, "uTrail");
+    const uRevealL = GL.getUniformLocation(prog, "uReveal");
+    const uBreathL = GL.getUniformLocation(prog, "uBreath");
 
-    const tex = gl.createTexture();
-    gl.bindTexture(gl.TEXTURE_2D, tex);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+    const tex = GL.createTexture()!;
+    GL.bindTexture(GL.TEXTURE_2D, tex);
+    GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_WRAP_S, GL.CLAMP_TO_EDGE);
+    GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_WRAP_T, GL.CLAMP_TO_EDGE);
+    GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MIN_FILTER, GL.LINEAR);
+    GL.texParameteri(GL.TEXTURE_2D, GL.TEXTURE_MAG_FILTER, GL.LINEAR);
+    GL.pixelStorei(GL.UNPACK_FLIP_Y_WEBGL, true);
 
     function upload() {
-      gl.bindTexture(gl.TEXTURE_2D, tex);
-      gl.texImage2D(
-        gl.TEXTURE_2D,
+      GL.bindTexture(GL.TEXTURE_2D, tex);
+      GL.texImage2D(
+        GL.TEXTURE_2D,
         0,
-        gl.RGBA,
-        gl.RGBA,
-        gl.UNSIGNED_BYTE,
+        GL.RGBA,
+        GL.RGBA,
+        GL.UNSIGNED_BYTE,
         tex2d,
       );
     }
 
     // ── Trail ring buffer ─────────────────────────────────
     const trailBuf = new Float32Array(TN * 3);
-    function pushPoint(x, y) {
+    function pushPoint(x: number, y: number) {
       for (let i = TN - 1; i > 0; i--) {
         trailBuf[i * 3] = trailBuf[(i - 1) * 3];
         trailBuf[i * 3 + 1] = trailBuf[(i - 1) * 3 + 1];
@@ -254,16 +261,16 @@ export default function HeroStatement() {
     let W = 0,
       H = 0;
     function resize() {
-      W = section.clientWidth;
-      H = section.clientHeight;
+      W = sec.clientWidth;
+      H = sec.clientHeight;
       if (!W || !H) return;
-      canvas.width = Math.round(W * DPR);
-      canvas.height = Math.round(H * DPR);
-      gl.viewport(0, 0, canvas.width, canvas.height);
-      gl.uniform1f(uAsp, W / H);
+      cvs.width = Math.round(W * DPR);
+      cvs.height = Math.round(H * DPR);
+      GL.viewport(0, 0, cvs.width, cvs.height);
+      GL.uniform1f(uAsp, W / H);
       drawText();
       upload();
-      gl.uniform2f(uLogoL, logoU, logoV);
+      GL.uniform2f(uLogoL, logoU, logoV);
     }
 
     // ── Interaction state ─────────────────────────────────
@@ -277,20 +284,20 @@ export default function HeroStatement() {
       my = window.innerHeight / 2;
     let cxPos = mx,
       cyPos = my;
-    let awakeTimer = null;
+    let awakeTimer: ReturnType<typeof setTimeout> | undefined;
     let lastX = 0,
       lastY = 0;
 
     function wake() {
-      section.classList.add("awake");
+      sec.classList.add("awake");
       clearTimeout(awakeTimer);
-      awakeTimer = setTimeout(() => section.classList.remove("awake"), 2600);
+      awakeTimer = setTimeout(() => sec.classList.remove("awake"), 2600);
     }
 
-    function onMove(e) {
+    function onMove(e: PointerEvent) {
       mx = e.clientX;
       my = e.clientY;
-      const r = canvas.getBoundingClientRect();
+      const r = cvs.getBoundingClientRect();
       const x = (e.clientX - r.left) / r.width;
       const y = 1 - (e.clientY - r.top) / r.height;
       const dx = x - lastX,
@@ -304,11 +311,11 @@ export default function HeroStatement() {
       breathActive = false;
       wake();
     }
-    function onOver(e) {
-      if (e.target.closest("a") && curEl) curEl.classList.add("lg");
+    function onOver(e: PointerEvent) {
+      if ((e.target as Element).closest("a") && curEl) curEl.classList.add("lg");
     }
-    function onOut(e) {
-      if (e.target.closest("a") && curEl) curEl.classList.remove("lg");
+    function onOut(e: PointerEvent) {
+      if ((e.target as Element).closest("a") && curEl) curEl.classList.remove("lg");
     }
 
     window.addEventListener("pointermove", onMove);
@@ -316,7 +323,7 @@ export default function HeroStatement() {
     document.addEventListener("pointerout", onOut);
 
     let t = 0,
-      raf;
+      raf = 0;
     function loop() {
       if (!W || !H) resize();
       const now = performance.now();
@@ -327,10 +334,10 @@ export default function HeroStatement() {
       // entrance easeOutCubic over 1900ms
       const rp = Math.min(1, (now - revealStart) / 1900);
       const rev = 1 - Math.pow(1 - rp, 3);
-      gl.uniform1f(uRevealL, rev);
+      GL.uniform1f(uRevealL, rev);
       if (!entered && rp > 0.5) {
         entered = true;
-        section.classList.add("entered");
+        sec.classList.add("entered");
         if (curEl) curEl.classList.add("visible");
       }
 
@@ -354,12 +361,12 @@ export default function HeroStatement() {
           bp = 0;
         }
       }
-      gl.uniform1f(uBreathL, bp);
+      GL.uniform1f(uBreathL, bp);
 
-      gl.uniform1f(uTime, t);
-      gl.uniform2f(uLogoL, logoU, logoV);
-      gl.uniform3fv(uTrl, trailBuf);
-      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+      GL.uniform1f(uTime, t);
+      GL.uniform2f(uLogoL, logoU, logoV);
+      GL.uniform3fv(uTrl, trailBuf);
+      GL.drawArrays(GL.TRIANGLE_STRIP, 0, 4);
 
       // lerped custom cursor
       cxPos += (mx - cxPos) * 0.22;
@@ -372,7 +379,7 @@ export default function HeroStatement() {
     }
 
     const ro = new ResizeObserver(() => document.fonts.ready.then(resize));
-    ro.observe(section);
+    ro.observe(sec);
     document.fonts.ready.then(() => {
       resize();
       raf = requestAnimationFrame(loop);
@@ -385,7 +392,7 @@ export default function HeroStatement() {
       window.removeEventListener("pointermove", onMove);
       document.removeEventListener("pointerover", onOver);
       document.removeEventListener("pointerout", onOut);
-      section.classList.remove("awake", "entered");
+      sec.classList.remove("awake", "entered");
       if (curEl) curEl.classList.remove("visible", "lg");
     };
   }, []);
