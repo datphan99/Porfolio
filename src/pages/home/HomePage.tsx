@@ -13,7 +13,7 @@ import Nav from "./sections/Nav/Nav";
 import Hero from "../../sections/HeroStatement";
 import Hello from "./sections/Hello/Hello";
 import Skills from "../../sections/Skills";
-import Projects from "../../sections/Projects";
+import Projects from "./sections/Projects/Projects";
 import Career from "./sections/Career/Career";
 import { profile } from "../../data/portfolio";
 
