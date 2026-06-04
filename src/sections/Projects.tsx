@@ -1,9 +1,21 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type Ref } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { projects } from "../data/portfolio.js";
+import { projects } from "../data/portfolio";
 
-function Card({ p, i, ref }) {
+interface ProjectCard {
+  name: string;
+  tag: string;
+  img: string;
+}
+
+interface CardProps {
+  p: ProjectCard;
+  i: number;
+  ref: Ref<HTMLElement>;
+}
+
+function Card({ p, i, ref }: CardProps) {
   const sideClass = i % 2 === 0 ? "is-right right-side" : "is-left left-side";
   return (
     <figure
@@ -14,7 +26,7 @@ function Card({ p, i, ref }) {
         `[will-change:transform,opacity,filter] ` +
         `after:content-[''] after:absolute after:-inset-px after:z-[3] ` +
         `after:rounded-[30px] after:pointer-events-none ` +
-        `after:[box-shadow:inset_0_0_4rem_8rem_var(--color-mist)]`
+        `after:[box-shadow:inset_0_0_4rem_8rem_var(--color-night)]`
       }
     >
       <div className="absolute inset-0 rounded-[30px] overflow-hidden">
@@ -41,10 +53,10 @@ function Card({ p, i, ref }) {
 }
 
 export default function Projects() {
-  const sectionRef = useRef(null);
-  const stageRef = useRef(null);
-  const statementRef = useRef(null);
-  const cardRefs = useRef([]);
+  const sectionRef = useRef<HTMLElement>(null);
+  const stageRef = useRef<HTMLDivElement>(null);
+  const statementRef = useRef<HTMLHeadingElement>(null);
+  const cardRefs = useRef<(HTMLElement | null)[]>([]);
 
   useEffect(() => {
     const reduce = window.matchMedia?.(
@@ -55,11 +67,13 @@ export default function Projects() {
       return;
     }
 
-    const cards = cardRefs.current.filter(Boolean);
+    const cards = cardRefs.current.filter(
+      (el): el is HTMLElement => el !== null,
+    );
     const N = cards.length;
     const clamp = gsap.utils.clamp;
 
-    function lerp(a, b, t) {
+    function lerp(a: number, b: number, t: number) {
       return a + (b - a) * t;
     }
 
@@ -69,7 +83,7 @@ export default function Projects() {
     const WIN = (1 - FIRST) / ((N - 1) * OVERLAP + 1);
     const STRIDE = OVERLAP * WIN;
 
-    function render(p) {
+    function render(p: number) {
       const vh = window.innerHeight;
       const startY = 0.62 * vh;
       const endY = -0.62 * vh;
@@ -103,7 +117,7 @@ export default function Projects() {
 
     let targetP = 0,
       curP = 0,
-      raf;
+      raf: number;
     function loop() {
       curP += (targetP - curP) * 0.08;
       if (Math.abs(targetP - curP) < 0.00015) curP = targetP;
@@ -138,7 +152,7 @@ export default function Projects() {
     };
   }, []);
 
-  const mapped = projects.map((p) => ({
+  const mapped: ProjectCard[] = projects.map((p) => ({
     name: p.name,
     tag: p.role,
     img: p.imageUrl,
@@ -154,14 +168,14 @@ export default function Projects() {
         ref={stageRef}
         className="projects-stage relative h-screen overflow-hidden"
       >
-        <p className="absolute top-9 inset-x-0 text-center z-[5] text-[11px] font-medium tracking-[0.24em] uppercase text-neutral-400">
+        <p className="absolute top-9 inset-x-0 text-center z-[5] text-[11px] font-medium tracking-[0.24em] uppercase text-white/40">
           Unforgettable experiences
         </p>
 
         <div className="statement-layer absolute inset-0 grid place-items-center z-[4] pointer-events-none">
           <h2
             ref={statementRef}
-            className="statement m-0 whitespace-nowrap font-semibold leading-none tracking-[-0.035em] text-ink text-[clamp(30px,5.4vw,62px)] [will-change:filter,opacity,transform]"
+            className="statement m-0 whitespace-nowrap font-semibold leading-none tracking-[-0.035em] text-[#eef1f7] text-[clamp(30px,5.4vw,62px)] [will-change:filter,opacity,transform]"
           >
             Unforgettable experiences
           </h2>
