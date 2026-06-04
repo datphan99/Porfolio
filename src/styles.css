@@ -1,15 +1,18 @@
 @import "tailwindcss";
 
 @theme {
-  --color-bg:   #ffffff;
-  --color-mist: #ffffff;
-  --color-ink:  #111111;
-  --color-dark: #0d0d0d;
-  --color-dot:  #ff3700;
+  --color-bg:     #ffffff;
+  --color-mist:   #ffffff;
+  --color-ink:    #15161a;
+  --color-dark:   #0d0d0d;
+  --color-dot:    #ff3700;
+  --color-muted:  #9a9a97;
+  --color-accent: #0071e3;
 
-  --font-sans:    Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-display: "Inter Display", Inter, sans-serif;
-  --font-script:  Caveat, cursive;
+  --font-sans:      "Saira", system-ui, sans-serif;
+  --font-display:   "Saira", sans-serif;
+  --font-condensed: "Saira Extra Condensed", sans-serif;
+  --font-script:    Caveat, cursive;
 
   --radius-card: 22px;
 
@@ -41,26 +44,38 @@
 }
 
 /* ─── Hero Statement (water-trail WebGL hero) ───────
-   Four corner registration-mark labels + animations. */
+   Corner labels, entrance animations, custom cursor. */
 .hs-corner {
   position: absolute; z-index: 3;
   --_side: clamp(22px, 4.4vw, 64px);
 }
 .hs-tl { top: var(--_side);    left:  var(--_side); }
-.hs-tr { top: var(--_side);    right: var(--_side); }
+.hs-tr { top: var(--_side);    right: var(--_side); text-align: right; }
 .hs-bl { bottom: var(--_side); left:  var(--_side); }
-.hs-br { bottom: var(--_side); right: var(--_side); }
+.hs-br { bottom: var(--_side); right: var(--_side); text-align: right; }
 
-@keyframes hs-pulse {
-  0%   { box-shadow: 0 0 0 0   rgba(47,184,99,.45); }
-  70%  { box-shadow: 0 0 0 7px rgba(47,184,99,0);   }
-  100% { box-shadow: 0 0 0 0   rgba(47,184,99,0);   }
+/* veil: hidden until mouse moves; quiet: hidden until entrance is 50% done */
+.hs-veil  { opacity: 0; transition: opacity .6s ease; }
+.hs-quiet { opacity: 0; transition: opacity 1.2s ease; }
+.hs-hero.awake   .hs-veil  { opacity: 1; }
+.hs-hero.entered .hs-quiet { opacity: .85; }
+
+/* Custom cursor — mix-blend-mode:difference white dot */
+@media (hover: hover) { .hs-hero { cursor: none; } }
+.hs-cursor {
+  position: fixed; left: 0; top: 0; z-index: 61;
+  width: 13px; height: 13px; border-radius: 50%;
+  background: #fff; mix-blend-mode: difference;
+  pointer-events: none; opacity: 0; will-change: transform;
+  transition: width .28s ease, height .28s ease, opacity .5s ease;
 }
-.hs-dot { animation: hs-pulse 2.4s infinite; }
+.hs-cursor.visible { opacity: 1; }
+.hs-cursor.lg      { width: 46px; height: 46px; }
+@media (hover: none) { .hs-cursor { display: none; } }
 
 .hs-ln {
   display: inline-block; position: relative;
-  width: 30px; height: 1px; background: #a7a7a3; overflow: hidden;
+  width: 30px; height: 1px; background: #9a9a97; overflow: hidden;
 }
 @keyframes hs-cue {
   0%         { transform: translateX(-120%); }

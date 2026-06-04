@@ -35,6 +35,8 @@ export default function App() {
   return (
     <>
       <Nav />
+      {/* HeroStatement custom cursor — fixed, outside smooth-wrapper so CSS transform doesn't break it */}
+      <div data-hs-cursor className="hs-cursor" aria-hidden="true" />
       {/* Canvas + caption live OUTSIDE smooth-wrapper so position:fixed works correctly */}
       <canvas ref={canvasRef} className="particle-stage" />
       <div ref={capRef} className="shape-cap" />

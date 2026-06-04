@@ -11,6 +11,9 @@ export default function Nav() {
     const el = eyebrowRef.current;
     if (!el) return;
 
+    // hidden on initial load — hero section owns the eyebrow area
+    gsap.set(el, { opacity: 0, y: -14 });
+
     const st = ScrollTrigger.create({
       start: 60,
       end: 99999,

@@ -3,6 +3,7 @@ import { useEffect, useRef } from "react";
 const LINE1 = "MAKE EVERY PIXEL";
 const LINE2 = "PAY FOR ITSELF";
 const TN = 20;
+const TRACK_EM = 0.06; // letter-spacing as fraction of font size
 
 const VERT = `attribute vec2 aPos;varying vec2 vUv;void main(){vUv=aPos*0.5+0.5;gl_Position=vec4(aPos,0.0,1.0);}`;
 
@@ -14,10 +15,12 @@ const FRAG = [
   "uniform float uAspect;",
   "uniform vec2  uLogo;",
   "uniform vec3  uTrail[20];",
+  "uniform float uReveal;",
+  "uniform float uBreath;",
   "void main(){",
   "  vec2 uv=vUv;",
   "  vec2 off=vec2(0.0); float hgt=0.0;",
-  "  // perpetual logo distortion — always on, no hover needed",
+  // perpetual logo distortion
   "  vec2 dl=uv-uLogo; dl.x*=uAspect;",
   "  float distL=length(dl);",
   "  float fl=exp(-distL*15.0);",
@@ -25,7 +28,7 @@ const FRAG = [
   "  vec2 dirL=normalize(uv-uLogo+1e-6);",
   "  off+=dirL*sin(phL)*0.010*fl;",
   "  hgt+=cos(phL)*0.010*fl;",
-  "  // cursor water trail — ring buffer of 20 recent positions",
+  // cursor water trail
   "  for(int i=0;i<20;i++){",
   "    vec3 p=uTrail[i];",
   "    vec2 dd=uv-p.xy; dd.x*=uAspect;",
@@ -40,6 +43,20 @@ const FRAG = [
   "    off+=dir*sin(phr)*0.004*fr*p.z;",
   "    hgt+=cos(phr)*0.004*fr*p.z;",
   "  }",
+  // idle breath — ring expanding from centre when field rests
+  "  if(uBreath>0.0){",
+  "    vec2 bc=uv-vec2(0.5); bc.x*=uAspect; float bd=length(bc);",
+  "    float env=sin(uBreath*3.14159);",
+  "    float front=exp(-abs(bd-uBreath*0.55)*9.0);",
+  "    float wave=sin(bd*30.0-uBreath*26.0);",
+  "    vec2 bdir=normalize(uv-vec2(0.5)+1e-6);",
+  "    off+=bdir*wave*0.015*env*front;",
+  "    hgt+=cos(bd*30.0-uBreath*26.0)*0.015*env*front;",
+  "  }",
+  // entrance: text condenses out of white mist once on load
+  "  float rev=clamp(uReveal,0.0,1.0);",
+  "  float n=sin(uv.x*7.0+uTime*0.6)*cos(uv.y*8.0-uTime*0.5);",
+  "  off+=vec2(n,-n)*0.06*(1.0-rev);",
   "  vec2 uv2=uv+off;",
   "  float ca=length(off)*0.9;",
   "  vec2 cdir=normalize(off+1e-6);",
@@ -48,6 +65,7 @@ const FRAG = [
   "  float b=texture2D(uTex,uv2-cdir*ca).b;",
   "  vec3 col=vec3(r,g,b);",
   "  col+=hgt*3.3;",
+  "  col=mix(vec3(1.0),col,smoothstep(0.0,1.0,rev));",
   "  gl_FragColor=vec4(clamp(col,0.0,1.0),1.0);",
   "}",
 ].join("\n");
@@ -59,6 +77,7 @@ export default function HeroStatement() {
   useEffect(() => {
     const section = sectionRef.current;
     const canvas = canvasRef.current;
+    const curEl = document.querySelector("[data-hs-cursor]");
     if (!section || !canvas) return;
 
     const DPR = Math.min(2, window.devicePixelRatio || 1);
@@ -75,10 +94,10 @@ export default function HeroStatement() {
       const x0 = cx - (cell * 2 + gap) / 2;
       const y0 = cy - (cell * 2 + gap) / 2;
       t2.fillStyle = INK;
-      t2.fillRect(x0, y0, cell, cell); // top-left
-      t2.fillRect(x0 + cell + gap, y0, cell, cell); // top-right
-      t2.fillRect(x0, y0 + cell + gap, cell, cell); // bottom-left
-      const lw = Math.max(2, s * 0.085); // bottom-right = outline
+      t2.fillRect(x0, y0, cell, cell);
+      t2.fillRect(x0 + cell + gap, y0, cell, cell);
+      t2.fillRect(x0, y0 + cell + gap, cell, cell);
+      const lw = Math.max(2, s * 0.085);
       t2.lineWidth = lw;
       t2.strokeStyle = INK;
       t2.strokeRect(
@@ -101,38 +120,45 @@ export default function HeroStatement() {
       t2.textAlign = "left";
       t2.textBaseline = "alphabetic";
 
-      t2.font = '600 100px "Saira Extra Condensed", sans-serif';
+      function setFont(px) {
+        t2.font = `600 ${px}px "Saira", sans-serif`;
+        if ("letterSpacing" in t2) t2.letterSpacing = `${px * TRACK_EM}px`;
+      }
+
+      setFont(100);
       let mw1 = t2.measureText(LINE1).width;
       let mw2 = t2.measureText(LINE2).width;
-      let fs = (100 * (w * 0.4)) / Math.max(mw1, mw2);
-      fs = Math.min(fs, h * 0.17);
-      t2.font = `600 ${fs}px "Saira Extra Condensed", sans-serif`;
+      let fs = (100 * (w * 0.42)) / Math.max(mw1, mw2);
+      fs = Math.min(fs, h * 0.118);
+      setFont(fs);
+      const track = fs * TRACK_EM;
       mw1 = t2.measureText(LINE1).width;
       mw2 = t2.measureText(LINE2).width;
 
-      const lineGap = fs * 1.06;
-      const logoSize = fs * 0.86;
-      const logoGap = fs * 0.3;
+      const lineGap = fs * 1.32;
+      const logoSize = fs * 0.76;
+      const logoGap = fs * 0.42;
       const top = (h - lineGap * 2) / 2;
       const base1 = top + fs * 0.8;
       const base2 = base1 + lineGap;
 
       t2.fillStyle = INK;
-      t2.fillText(LINE1, (w - mw1) / 2, base1);
+      // subtract trailing track from width so centering is glyph-accurate
+      t2.fillText(LINE1, (w - (mw1 - track)) / 2, base1);
 
-      const unitW = mw2 + logoGap + logoSize;
+      const unitW = mw2 - track + logoGap + logoSize;
       const startX2 = (w - unitW) / 2;
       t2.fillText(LINE2, startX2, base2);
 
-      const lcx = startX2 + mw2 + logoGap + logoSize / 2;
-      const lcy = base2 - fs * 0.3;
+      const lcx = startX2 + (mw2 - track) + logoGap + logoSize / 2;
+      const lcy = base2 - fs * 0.34;
       drawLogo(lcx, lcy, logoSize);
 
       logoU = lcx / w;
-      logoV = 1 - lcy / h; // GL: bottom-left origin
+      logoV = 1 - lcy / h;
     }
 
-    // ── WebGL init ──────────────────────────────────────────
+    // ── WebGL init ────────────────────────────────────────
     const gl = canvas.getContext("webgl", {
       premultipliedAlpha: false,
       antialias: true,
@@ -186,6 +212,8 @@ export default function HeroStatement() {
     const uAsp = gl.getUniformLocation(prog, "uAspect");
     const uLogoL = gl.getUniformLocation(prog, "uLogo");
     const uTrl = gl.getUniformLocation(prog, "uTrail");
+    const uRevealL = gl.getUniformLocation(prog, "uReveal");
+    const uBreathL = gl.getUniformLocation(prog, "uBreath");
 
     const tex = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, tex);
@@ -207,7 +235,7 @@ export default function HeroStatement() {
       );
     }
 
-    // ── Cursor trail: ring buffer, fade by 0.95 each frame ──
+    // ── Trail ring buffer ─────────────────────────────────
     const trailBuf = new Float32Array(TN * 3);
     function pushPoint(x, y) {
       for (let i = TN - 1; i > 0; i--) {
@@ -238,9 +266,30 @@ export default function HeroStatement() {
       gl.uniform2f(uLogoL, logoU, logoV);
     }
 
+    // ── Interaction state ─────────────────────────────────
+    let revealStart = 0;
+    let lastMove = performance.now();
+    let lastBreath = performance.now();
+    let breathActive = false,
+      breathStart = 0;
+    let entered = false;
+    let mx = window.innerWidth / 2,
+      my = window.innerHeight / 2;
+    let cxPos = mx,
+      cyPos = my;
+    let awakeTimer = null;
     let lastX = 0,
       lastY = 0;
+
+    function wake() {
+      section.classList.add("awake");
+      clearTimeout(awakeTimer);
+      awakeTimer = setTimeout(() => section.classList.remove("awake"), 2600);
+    }
+
     function onMove(e) {
+      mx = e.clientX;
+      my = e.clientY;
       const r = canvas.getBoundingClientRect();
       const x = (e.clientX - r.left) / r.width;
       const y = 1 - (e.clientY - r.top) / r.height;
@@ -251,19 +300,74 @@ export default function HeroStatement() {
         lastX = x;
         lastY = y;
       }
+      lastMove = performance.now();
+      breathActive = false;
+      wake();
     }
+    function onOver(e) {
+      if (e.target.closest("a") && curEl) curEl.classList.add("lg");
+    }
+    function onOut(e) {
+      if (e.target.closest("a") && curEl) curEl.classList.remove("lg");
+    }
+
     window.addEventListener("pointermove", onMove);
+    document.addEventListener("pointerover", onOver);
+    document.addEventListener("pointerout", onOut);
 
     let t = 0,
       raf;
     function loop() {
       if (!W || !H) resize();
+      const now = performance.now();
+      if (!revealStart) revealStart = now;
       t += 0.016;
       decay();
+
+      // entrance easeOutCubic over 1900ms
+      const rp = Math.min(1, (now - revealStart) / 1900);
+      const rev = 1 - Math.pow(1 - rp, 3);
+      gl.uniform1f(uRevealL, rev);
+      if (!entered && rp > 0.5) {
+        entered = true;
+        section.classList.add("entered");
+        if (curEl) curEl.classList.add("visible");
+      }
+
+      // idle breath: ring expands from center when mouse rests 3.8s
+      const idle = now - lastMove;
+      if (
+        idle > 3800 &&
+        !breathActive &&
+        now - lastBreath > 5200 &&
+        rev > 0.99
+      ) {
+        breathActive = true;
+        breathStart = now;
+      }
+      let bp = 0;
+      if (breathActive) {
+        bp = (now - breathStart) / 2400;
+        if (bp >= 1) {
+          breathActive = false;
+          lastBreath = now;
+          bp = 0;
+        }
+      }
+      gl.uniform1f(uBreathL, bp);
+
       gl.uniform1f(uTime, t);
       gl.uniform2f(uLogoL, logoU, logoV);
       gl.uniform3fv(uTrl, trailBuf);
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+
+      // lerped custom cursor
+      cxPos += (mx - cxPos) * 0.22;
+      cyPos += (my - cyPos) * 0.22;
+      if (curEl) {
+        curEl.style.transform = `translate(${cxPos}px,${cyPos}px) translate(-50%,-50%)`;
+      }
+
       raf = requestAnimationFrame(loop);
     }
 
@@ -276,36 +380,33 @@ export default function HeroStatement() {
 
     return () => {
       cancelAnimationFrame(raf);
+      clearTimeout(awakeTimer);
       ro.disconnect();
       window.removeEventListener("pointermove", onMove);
+      document.removeEventListener("pointerover", onOver);
+      document.removeEventListener("pointerout", onOut);
+      section.classList.remove("awake", "entered");
+      if (curEl) curEl.classList.remove("visible", "lg");
     };
   }, []);
 
   return (
     <section
       ref={sectionRef}
-      className="relative w-screen h-screen overflow-hidden bg-white cursor-crosshair"
+      className="hs-hero relative w-screen h-screen overflow-hidden bg-white"
     >
-      {/* Full-bleed WebGL plane */}
       <canvas
         ref={canvasRef}
         className="absolute inset-0 z-[1] block w-full h-full"
       />
 
-      {/* Off-screen accessible headline */}
       <h1 className="sr-only">Make Every Pixel Pay For Itself</h1>
 
-      {/* BL — availability status */}
-      <div className="hs-corner hs-bl pointer-events-none">
-        <div className="flex items-center gap-2 font-semibold text-[13px] uppercase tracking-[0.04em] text-[#15161a]">
-          <span className="hs-dot inline-block w-2 h-2 rounded-full bg-[#2fb863]" />
-          Available for work — 2026
-        </div>
-      </div>
+      {/* TR — menu, appears on mouse movement */}
 
-      {/* BR — scroll cue */}
-      <div className="hs-corner hs-br pointer-events-none">
-        <div className="flex items-center gap-[9px] text-[11px] font-semibold tracking-[0.18em] uppercase text-[#a7a7a3]">
+      {/* BR — scroll cue, fades in after entrance */}
+      <div className="hs-corner hs-br hs-quiet pointer-events-none">
+        <div className="flex items-center gap-[9px] text-[11px] font-semibold tracking-[0.18em] uppercase text-[#9a9a97]">
           Scroll
           <span className="hs-ln" />
         </div>
