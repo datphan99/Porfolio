@@ -1,4 +1,14 @@
-export const profile = {
+import type {
+  Profile,
+  NavLink,
+  ShowcaseItem,
+  HelloPill,
+  Skill,
+  CareerEntry,
+  Project,
+} from "../types";
+
+export const profile: Profile = {
   name: "Dat Phan",
   role: "Dat Phan / Frontend Developer",
   location: "Ho Chi Minh City, Vietnam",
@@ -7,7 +17,7 @@ export const profile = {
   email: "hello@example.com",
 };
 
-export const navLinks = [
+export const navLinks: NavLink[] = [
   { href: "#about", label: "Process" },
   { href: "#work", label: "Portfolio" },
   { href: "#skills", label: "Skills" },
@@ -15,14 +25,14 @@ export const navLinks = [
   { href: "#contact", label: "Contact" },
 ];
 
-export const showcaseItems = [
+export const showcaseItems: ShowcaseItem[] = [
   { id: 1, alt: "Project 1", tag: null },
   { id: 2, alt: "Project 2", tag: "Freelance" },
   { id: 3, alt: "Project 3", tag: null },
   { id: 4, alt: "Project 4", tag: null },
 ];
 
-export const helloPills = [
+export const helloPills: HelloPill[] = [
   {
     id: "a",
     label: "Design systems",
@@ -37,7 +47,7 @@ export const helloPills = [
   { id: "f", label: "Strategy", icon: "⋈", color: "#ffcf26", side: "right" },
 ];
 
-export const skills = [
+export const skills: Skill[] = [
   {
     id: 1,
     tag: "Top performing",
@@ -133,7 +143,7 @@ export const skills = [
   },
 ];
 
-export const careerEntries = [
+export const careerEntries: CareerEntry[] = [
   {
     role: "Creative Designer",
     company: "TryHackMe LLC",
@@ -147,7 +157,7 @@ export const careerEntries = [
   { role: "Head of Design", company: "Involve", period: "2024 – 2025" },
 ];
 
-export const projects = [
+export const projects: Project[] = [
   {
     id: 1,
     name: "San Miguel",
@@ -190,4 +200,4 @@ export const projects = [
   },
 ];
 
-export const services = [];
+export const services: never[] = [];
