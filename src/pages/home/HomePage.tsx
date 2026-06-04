@@ -14,7 +14,7 @@ import Hero from "../../sections/HeroStatement";
 import Hello from "../../sections/Hello";
 import Skills from "../../sections/Skills";
 import Projects from "../../sections/Projects";
-import Career from "../../sections/Career";
+import Career from "./sections/Career/Career";
 import { profile } from "../../data/portfolio";
 
 gsap.registerPlugin(ScrollTrigger, ScrollSmoother, SplitText, Draggable, useGSAP);
