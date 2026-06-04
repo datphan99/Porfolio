@@ -39,11 +39,18 @@ window.ResizeObserver = window.ResizeObserver || ResizeObserverMock;
 HTMLCanvasElement.prototype.getContext = (() =>
   null) as typeof HTMLCanvasElement.prototype.getContext;
 
-// jsdom may not implement FontFaceSet; the hero fallback awaits document.fonts.ready.
-// A never-resolving promise keeps the test synchronous (no async canvas draw).
-if (!("fonts" in document)) {
-  Object.defineProperty(document, "fonts", {
-    configurable: true,
-    value: { ready: new Promise<void>(() => {}) },
-  });
-}
+// jsdom's FontFaceSet stub is incomplete (missing addEventListener/removeEventListener).
+// GSAP SplitText calls fonts.removeEventListener on cleanup, so we replace document.fonts
+// with a minimal stub that satisfies all callers.  The never-resolving `ready` promise
+// keeps the hero's font-await branch synchronous so no async canvas draw fires.
+Object.defineProperty(document, "fonts", {
+  configurable: true,
+  writable: true,
+  value: {
+    ready: new Promise<void>(() => {}),
+    addEventListener: () => {},
+    removeEventListener: () => {},
+    check: () => true,
+    load: () => Promise.resolve([]),
+  },
+});
