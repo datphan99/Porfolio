@@ -16,63 +16,65 @@ npm run test       # run Vitest once (CI mode)
 npm run test:watch # run Vitest in watch mode
 ```
 
-Run a single test file: `npx vitest run src/App.test.jsx`
+Run a single test file: `npx vitest run src/App.test.tsx`
 
 ## Architecture
 
-This is a single-page React portfolio built with Vite. The entire app lives in two source files:
+This is a single-route React + TypeScript portfolio built with Vite. The app is a routed page split into per-section folders:
 
-- **`src/App.jsx`** — all page components (Home, Work, About, Contact), Header, PageTransition, and the root `App`. Nothing is split into separate component files.
-- **`src/data/portfolio.js`** — the only content to edit: `profile`, `projects`, and `services` exports.
-- **`src/styles.css`** — all CSS. Design tokens are CSS variables on `:root` (`--ink`, `--paper`, `--accent`, `--muted`, `--line`).
+- **`src/App.tsx`** — the router root: `createBrowserRouter([{ path: "/", element: <HomePage /> }])` + `<RouterProvider>`. There is exactly **one** route (`/`).
+- **`src/pages/home/HomePage.tsx`** — the page. Owns the shared "stage" refs, provides `HomeStageContext`, registers GSAP plugins at module scope, and renders the fixed stage layers + the 6 sections + footer inside `#smooth-wrapper > #smooth-content`.
+- **`src/pages/home/sections/<Name>/`** — each animated section is a folder: `<Name>.tsx` (UI / render) + one or more `use<Name>...` hooks (animation logic). Shared sub-components sit beside them (`Projects/ProjectCard.tsx`, `Skills/MobileSection.tsx`). Extracted constants live in helper modules (`Hero/heroShaders.ts`, `Skills/particles.ts`). Sections: `Nav`, `Hero`, `Hello`, `Skills`, `Projects`, `Career`.
+- **`src/pages/home/useSmoothScroller.ts`** — `ScrollSmoother.create(...)` init + cleanup, called from `HomePage`.
+- **`src/data/portfolio.ts`** — the only content to edit: `profile`, `navLinks`, `showcaseItems`, `helloPills`, `skills`, `careerEntries`, `projects` exports.
+- **`src/types.ts`** — shared TypeScript interfaces for all data shapes and props.
+- **`src/styles.css`** — all CSS. Design tokens are CSS variables on `:root` (`--dot: #ff3700`, `--radius: 22px`).
 
-## Animation system
+### Hook/UI split convention
 
-GSAP + ScrollTrigger drive all animations. The convention:
+Each animated section separates **logic** from **render**: the `use<Name>...` hook receives the refs it needs and owns the entire effect (canvas/WebGL/ScrollTrigger setup + RAF loop + cleanup); the `<Name>.tsx` component renders JSX and owns only UI state. When adding or modifying animation, put the GSAP/ScrollTrigger work in the hook, not the component.
 
-- Add `data-animate` to any element that should fade-in on scroll. The `useGSAP` hook in `App` auto-discovers all `[data-animate]` elements via `gsap.utils.toArray`.
-- Page transition: `.transition-layer span` animates `scaleX` from 1→0 on every route change, acting as a wipe.
-- `useGSAP` is scoped to `appRef` and re-runs when `location.pathname` changes (kills all ScrollTriggers on cleanup).
+### Shared stage context
+
+`HomePage` creates four refs and provides them via **`HomeStageContext`** (`src/pages/home/HomeStageContext.tsx`):
+- `canvasRef` — the particle-stage `<canvas>`
+- `capRef` — the shape caption
+- `skyRef` — the fixed night-sky layer
+- `cursorRef` — the Hero custom cursor
+
+These DOM nodes live **outside** `#smooth-wrapper` (so `position: fixed` survives ScrollSmoother's transform). Sections read them via `useHomeStage()` instead of prop-drilling or `document.querySelector`. `useHomeStage()` throws if used outside the provider.
 
 ## GSAP conventions
 
-**Plugin registration** — always at module scope (top of the file), never inside a component or hook:
-```js
-gsap.registerPlugin(ScrollTrigger, useGSAP);
+**Plugin registration** — at module scope in `src/pages/home/HomePage.tsx`, never inside a component or hook. Currently:
+```ts
+gsap.registerPlugin(ScrollTrigger, ScrollSmoother, SplitText, Draggable, useGSAP);
 ```
+If you add a new plugin (e.g. `Flip`, `Observer`), add it to this call.
 
-**Easing presets used in this project:**
-- `power3.out` — scroll-triggered element reveals (feels snappy, settles naturally)
-- `power3.inOut` — page transition wipe (symmetrical, cinematic)
+**Easings in use:** `power2.out` and `power3.out` for scroll-triggered reveals; `elastic.out(...)` for the playful pill drop in Hello. Match the easing to the intent (snappy settle vs. bouncy).
 
 **Timeline vs individual tweens:**
 - Use `gsap.timeline()` when multiple elements must be choreographed in sequence or with stagger.
-- Use standalone `gsap.fromTo()` (as done now) when each element is independently triggered by its own ScrollTrigger.
+- Use standalone `gsap.fromTo()` when each element is independently triggered by its own ScrollTrigger.
 
-**ScrollTrigger cleanup is mandatory.** The `useGSAP` cleanup return must always kill all triggers to prevent ghost triggers on route change:
-```js
-return () => {
-  ScrollTrigger.getAll().forEach((t) => t.kill());
-};
-```
-
-**`useGSAP` scope** — always pass `{ scope: ref }` so GSAP selectors are scoped to the component subtree and don't bleed into other parts of the DOM.
+**ScrollTrigger cleanup is mandatory.** Every hook's effect must tear down what it created on cleanup (kill triggers, RAF loops, ScrollSmoother) so nothing leaks. Hooks using `useGSAP` should pass `{ scope: ref }` so selectors stay scoped to the section subtree.
 
 ## Smooth scroll
 
-`useSmoothScroll()` creates a Lenis instance and drives it via a `requestAnimationFrame` loop that also calls `ScrollTrigger.update()`. This keeps GSAP ScrollTrigger in sync with Lenis's virtual scroll position. Lenis is destroyed on unmount.
+`useSmoothScroller()` creates a GSAP **`ScrollSmoother`** (`smooth: 1.4`, `effects: true`, `normalizeScroll: true`) bound to `#smooth-wrapper` / `#smooth-content`, and kills it on unmount. ScrollSmoother keeps ScrollTrigger in sync internally — there is no manual RAF loop and **no Lenis**.
 
-## Routing
+## Cross-section coupling (intentional)
 
-React Router v7 with four routes: `/`, `/work`, `/about`, `/contact`. All routes are declared in the `App` component's `<Routes>` block. Navigation uses `<NavLink>` so the active class is applied automatically.
+- **Hello → Skills "dissolve" bridge.** `Skills`/`useParticleField` reads and animates the Hello headline elements (`.hello-char`, `.hello-title`, `.hello-eyebrow`, `.hello-pill`) via `document.querySelector(All)` to morph text into particles. This DOM-query bridge is deliberate and out of scope to refactor.
+- **`body.is-dark` toggle.** `useParticleField` toggles the global dark theme and drives the night-sky opacity across the pinned Projects span.
 
 ## Testing
 
-Vitest + `@testing-library/react` with jsdom. Setup file: `src/test/setup.js`. Wrap components in `<MemoryRouter>` when rendering anything that uses React Router hooks.
+Vitest + `@testing-library/react` with jsdom. Setup file: `src/test/setup.ts`. Render `HomePage` (or anything using Router hooks) wrapped in `<MemoryRouter>`. The setup stubs `HTMLCanvasElement.getContext` (returns `null`; the app null-guards) and `document.fonts` (full FontFaceSet shape — SplitText's cleanup calls `removeEventListener`).
 
 ## Gotchas
 
-- **`scroll-behavior: auto` is intentional.** It is set on `html` to disable the browser's native smooth scroll — Lenis owns all scroll behavior. Do not change it to `smooth`.
-- **GSAP plugins must be registered before use.** If you add a new plugin (e.g., `Flip`, `Draggable`), add it to the `gsap.registerPlugin(...)` call at the top of `App.jsx`.
-- **Lenis + ScrollTrigger RAF coupling.** `ScrollTrigger.update()` is called inside the Lenis RAF loop. If the RAF loop is removed or broken, ScrollTrigger-based animations will not fire at the correct scroll position.
-- **All page components live in `App.jsx`.** This is intentional for simplicity. Do not extract them into separate files unless the user explicitly asks to restructure.
+- **`scroll-behavior: auto` is intentional.** Set on `html` to disable the browser's native smooth scroll — ScrollSmoother owns all scroll behavior. Do not change it to `smooth`.
+- **Stage DOM must stay outside `#smooth-wrapper`.** The canvas, caption, night-sky, and hero cursor rely on `position: fixed`; ScrollSmoother applies a transform to `#smooth-content` that would break fixed positioning if they lived inside it.
+- **Move animation logic verbatim.** The hooks were extracted as a pure refactor — exact math, easing, ScrollTrigger start/end/trigger values, and cleanup order are load-bearing. Don't "improve" them casually; verify scroll feel after any change.
