@@ -15,6 +15,7 @@ export const FRAG = [
   "uniform vec3  uTrail[20];",
   "uniform float uReveal;",
   "uniform float uBreath;",
+  "uniform float uSplash;",
   "void main(){",
   "  vec2 uv=vUv;",
   "  vec2 off=vec2(0.0); float hgt=0.0;",
@@ -51,6 +52,17 @@ export const FRAG = [
   "    off+=bdir*wave*0.015*env*front;",
   "    hgt+=cos(bd*30.0-uBreath*26.0)*0.015*env*front;",
   "  }",
+  // splash — one-shot ring bursting from the screen centre where the
+  // loader's droplet lands, like a drop hitting a still lake
+  "  if(uSplash>0.0){",
+  "    vec2 pc=uv-vec2(0.5); pc.x*=uAspect; float pd=length(pc);",
+  "    float penv=1.0-uSplash;",
+  "    float pfront=exp(-abs(pd-uSplash*0.6)*8.0);",
+  "    float pph=pd*44.0-uSplash*34.0;",
+  "    vec2 pdir=normalize(uv-vec2(0.5)+1e-6);",
+  "    off+=pdir*sin(pph)*0.04*penv*pfront;",
+  "    hgt+=cos(pph)*0.04*penv*pfront;",
+  "  }",
   // entrance: text condenses out of white mist once on load
   "  float rev=clamp(uReveal,0.0,1.0);",
   "  float n=sin(uv.x*7.0+uTime*0.6)*cos(uv.y*8.0-uTime*0.5);",
@@ -63,7 +75,12 @@ export const FRAG = [
   "  float b=texture2D(uTex,uv2-cdir*ca).b;",
   "  vec3 col=vec3(r,g,b);",
   "  col+=hgt*3.3;",
-  "  col=mix(vec3(1.0),col,smoothstep(0.0,1.0,rev));",
+  // reveal spreads as a soft-edged disc rippling out from the centre splash,
+  // so the text surfaces behind the expanding wave (rev=1 covers the screen)
+  "  vec2 rc=vUv-vec2(0.5); rc.x*=uAspect; float rdd=length(rc);",
+  "  float spread=rev*1.6;",
+  "  float vis=1.0-smoothstep(spread-0.28,spread,rdd);",
+  "  col=mix(vec3(1.0),col,vis);",
   "  gl_FragColor=vec4(clamp(col,0.0,1.0),1.0);",
   "}",
 ].join("\n");

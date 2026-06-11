@@ -12,8 +12,8 @@ export default function Career() {
 
         <div className="career-header flex items-start justify-between gap-6 mb-[90px] max-md:flex-col max-md:mb-14">
           <div className="career-headings">
-            <p className="font-script text-[24px] text-[#111] mb-[26px]">/ Career</p>
-            <h2 className="text-[clamp(44px,5vw,76px)] font-bold tracking-[-0.03em] leading-none">
+            <p className="text-[12px] font-semibold tracking-[0.22em] uppercase text-muted mb-[26px]">( Career )</p>
+            <h2 className="text-[clamp(44px,5vw,76px)] font-semibold tracking-[-0.04em] leading-none">
               Work <em className="not-italic text-[#ff3700]">Experience</em>
             </h2>
             <p className="mt-[22px] text-black/50 text-[18px]">My impact over the years.</p>
@@ -33,7 +33,7 @@ export default function Career() {
               key={i}
             >
               <div>
-                <h3 className="text-[clamp(24px,2.4vw,32px)] font-bold tracking-[-0.015em]">{entry.role}</h3>
+                <h3 className="text-[clamp(24px,2.4vw,32px)] font-semibold tracking-[-0.02em]">{entry.role}</h3>
                 <p className="mt-[18px] text-black/40 text-[18px]">{entry.company}</p>
               </div>
               <span className="flex-none text-black/50 text-[18px] pt-1.5">{entry.period}</span>

@@ -1,5 +1,6 @@
 import { useEffect, type RefObject } from "react";
 import { LINE1, LINE2, TN, TRACK_EM, VERT, FRAG } from "./heroShaders";
+import { onHeroReveal } from "../../intro";
 
 export function useHeroCanvas(
   sectionRef: RefObject<HTMLElement | null>,
@@ -153,6 +154,7 @@ export function useHeroCanvas(
     const uTrl = GL.getUniformLocation(prog, "uTrail");
     const uRevealL = GL.getUniformLocation(prog, "uReveal");
     const uBreathL = GL.getUniformLocation(prog, "uBreath");
+    const uSplashL = GL.getUniformLocation(prog, "uSplash");
 
     const tex = GL.createTexture()!;
     GL.bindTexture(GL.TEXTURE_2D, tex);
@@ -206,7 +208,18 @@ export function useHeroCanvas(
     }
 
     // ── Interaction state ─────────────────────────────────
+    // The reveal waits for the loading-screen handoff (onHeroReveal): the dots
+    // plunge in, then the splash + reveal ripple out from the logo point.
+    // When the intro is skipped (F5 same session, back from a case study) the
+    // signal fires immediately on mount, so the splash reveal still plays —
+    // just without the loader. Only reduced motion goes straight to revealed.
+    const instantReveal =
+      !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
     let revealStart = 0;
+    let startReveal = false;
+    const offReveal = onHeroReveal(() => {
+      startReveal = true;
+    });
     let lastMove = performance.now();
     let lastBreath = performance.now();
     let breathActive = false,
@@ -259,15 +272,27 @@ export function useHeroCanvas(
     function loop() {
       if (!W || !H) resize();
       const now = performance.now();
-      if (!revealStart) revealStart = now;
       t += 0.016;
       decay();
 
-      // entrance easeOutCubic over 1900ms
-      const rp = Math.min(1, (now - revealStart) / 1900);
-      const rev = 1 - Math.pow(1 - rp, 3);
+      // Hold at uReveal=0 (blank white) until the loader hands off. On the
+      // handoff (= dot impact) the splash ring fires immediately and the
+      // reveal disc follows 200ms behind it, surfacing the text behind the
+      // wave (easeOutCubic over 1900ms). Instant path: no splash, just there.
+      if (startReveal && !revealStart) revealStart = now;
+      let rev = 0;
+      let splash = 0;
+      if (instantReveal) {
+        rev = startReveal ? 1 : 0;
+      } else if (revealStart) {
+        const sp = (now - revealStart) / 1400;
+        splash = sp < 1 ? sp : 0;
+        const rp = Math.min(1, Math.max(0, (now - revealStart - 200) / 1900));
+        rev = 1 - Math.pow(1 - rp, 3);
+      }
       GL.uniform1f(uRevealL, rev);
-      if (!entered && rp > 0.5) {
+      GL.uniform1f(uSplashL, splash);
+      if (!entered && rev > 0.5) {
         entered = true;
         sec.classList.add("entered");
         if (curEl) curEl.classList.add("visible");
@@ -320,6 +345,7 @@ export function useHeroCanvas(
     return () => {
       cancelAnimationFrame(raf);
       clearTimeout(awakeTimer);
+      offReveal();
       ro.disconnect();
       window.removeEventListener("pointermove", onMove);
       document.removeEventListener("pointerover", onOver);

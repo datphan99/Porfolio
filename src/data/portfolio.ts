@@ -160,44 +160,38 @@ export const careerEntries: CareerEntry[] = [
 export const projects: Project[] = [
   {
     id: 1,
-    name: "San Miguel",
-    role: "America's Cup",
-    imageUrl: "https://placehold.co/1200x800/2b3b34/ffffff?text=San+Miguel",
-    videoUrl: null,
-    detailUrl: "#",
-    tags: "Brand · Web · Motion",
-    year: "2025",
-  },
-  {
-    id: 2,
-    name: "Atlas Finance",
-    role: "Product Design",
+    name: "Fund",
+    role: "Fullstack Developer",
     imageUrl: "https://placehold.co/1200x800/c9c5bc/15161a?text=Atlas",
     videoUrl: null,
     detailUrl: "#",
     tags: "Product Design",
     year: "2025",
+    caseStudyId: 1,
+    dashboard: true,
   },
   {
-    id: 3,
-    name: "Helios Studio",
-    role: "Brand System",
-    imageUrl: "https://placehold.co/1200x800/1b1b1d/ffffff?text=Helios",
+    id: 2,
+    name: "More to come",
+    role: "The journey continues",
+    imageUrl: "",
     videoUrl: null,
     detailUrl: "#",
-    tags: "Brand · Web",
-    year: "2024",
-  },
-  {
-    id: 4,
-    name: "Field Notes",
-    role: "Editorial",
-    imageUrl: "https://placehold.co/1200x800/8e8b83/ffffff?text=Field+Notes",
-    videoUrl: null,
-    detailUrl: "#",
-    tags: "Editorial · Motion",
-    year: "2024",
+    tags: "",
+    year: "",
+    placeholder: true,
   },
 ];
+
+// Contact form options — single-select pill groups.
+export const contactInterests: string[] = [
+  "UX/UI Design",
+  "Web-design",
+  "Web-development",
+  "Website creation",
+  "Animation",
+  "Other",
+];
+export const contactBudgets: string[] = ["$1k-3k", "$3k-5k", "$5k-10k"];
 
 export const services: unknown[] = [];

@@ -1,32 +1,42 @@
 // ── SVG glyphs ────────────────────────────────────────────────────────────────
+// Each fragment lives in a 200×200 viewBox, roughly centred on (100,100), and is
+// rasterised into a particle point-cloud. Filled areas read as dense bands;
+// strokes read as thin lines — keep stroke widths chunky so the cloud has body.
 export const SVGS: Record<string, string> = {
-  one: '<circle cx="100" cy="100" r="60" fill="#000"/>',
-  creation:
-    '<circle cx="100" cy="70" r="34" fill="#000"/>' +
-    '<circle cx="72" cy="129" r="34" fill="#000"/>' +
-    '<circle cx="128" cy="129" r="34" fill="#000"/>',
-  growth:
-    '<circle cx="100" cy="100" r="60" fill="none" stroke="#000" stroke-width="24"/>',
-  modernization:
-    '<g fill="none" stroke="#000" stroke-width="17" stroke-linecap="round">' +
-    '<path d="M40 100 A 60 60 0 0 1 160 100"/>' +
-    '<path d="M160 100 A 60 60 0 0 1 40 100"/></g>' +
-    '<g fill="#000"><path d="M160 124 L146 98 L174 98 Z"/>' +
-    '<path d="M40 76 L54 102 L26 102 Z"/></g>',
-  techstack:
-    '<g fill="none" stroke="#000" stroke-width="12" stroke-linejoin="round">' +
-    '<path d="M100 50 L156 78 L100 106 L44 78 Z"/>' +
-    '<path d="M100 100 L156 128 L100 156 L44 128 Z"/>' +
-    '<path d="M100 150 L156 178 L100 206 L44 178 Z"/></g>',
+  // Interface Design — an app/artboard window: framed canvas, title bar with
+  // dots, and a couple of layout blocks.
+  interface:
+    '<g fill="none" stroke="#000" stroke-width="9" stroke-linejoin="round">' +
+    '<rect x="40" y="46" width="120" height="108" rx="13"/></g>' +
+    '<path d="M40 76 H160" stroke="#000" stroke-width="7"/>' +
+    '<g fill="#000">' +
+    '<circle cx="55" cy="61" r="4.5"/><circle cx="71" cy="61" r="4.5"/><circle cx="87" cy="61" r="4.5"/>' +
+    '<rect x="54" y="92" width="38" height="22" rx="4"/>' +
+    '<rect x="102" y="92" width="44" height="22" rx="4"/>' +
+    '<rect x="54" y="124" width="38" height="18" rx="4"/>' +
+    '<rect x="102" y="124" width="30" height="18" rx="4"/></g>',
+  // Frontend — the </> code-tag glyph.
+  frontend:
+    '<g fill="none" stroke="#000" stroke-width="14" stroke-linecap="round" stroke-linejoin="round">' +
+    '<path d="M76 62 L40 100 L76 138"/>' +
+    '<path d="M124 62 L160 100 L124 138"/>' +
+    '<path d="M114 54 L86 146"/></g>',
+  // Backend — a stacked database cylinder.
+  backend:
+    '<g fill="none" stroke="#000" stroke-width="9" stroke-linecap="round" stroke-linejoin="round">' +
+    '<ellipse cx="100" cy="54" rx="46" ry="16"/>' +
+    '<path d="M54 54 V138"/><path d="M146 54 V138"/>' +
+    '<path d="M54 84 Q 100 116 146 84"/>' +
+    '<path d="M54 111 Q 100 143 146 111"/>' +
+    '<path d="M54 138 Q 100 170 146 138"/></g>',
 };
 
 export const LABELS: Record<string, string> = {
-  creation: "Idea → Forms",
-  growth: "Reach",
-  modernization: "Renewal",
-  techstack: "Foundation",
+  interface: "Look & Feel",
+  frontend: "In the Browser",
+  backend: "Behind the Scenes",
 };
-export const SHAPE_KEYS = ["one", "creation", "growth", "modernization", "techstack"];
+export const SHAPE_KEYS = ["interface", "frontend", "backend"];
 
 // ── Shared helpers ────────────────────────────────────────────────────────────
 export function sample(frag: string): Promise<number[]> {

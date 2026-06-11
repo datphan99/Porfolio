@@ -8,6 +8,7 @@
   --color-dot:    #ff3700;
   --color-muted:  #9a9a97;
   --color-accent: #0071e3;
+  --color-night:  #0b0d14;
 
   --font-sans:      "Saira", system-ui, sans-serif;
   --font-display:   "Saira", sans-serif;
@@ -22,6 +23,8 @@
 @layer base {
   /* scroll-behavior: auto is intentional — ScrollSmoother owns all scroll, not the browser */
   html { scroll-behavior: auto; }
+  /* White base behind the transparent smooth-content; the night sky fades over it */
+  body { background-color: #fff; }
 
   img    { @apply max-w-full block; }
   a      { @apply text-inherit no-underline; }
@@ -41,6 +44,55 @@
 :root {
   --dot: #ff3700;
   --radius: 22px;
+}
+
+/* ─── Loading screen (AWWWARDS-style intro curtain) ──
+   Fixed ink panel above everything; a counter eases up while
+   fonts load, then the whole panel lifts off the top to reveal
+   the hero — handing off to the hero shader reveal mid-lift. */
+.intro {
+  position: fixed; inset: 0; z-index: 100;
+  background: #0d0d0d; color: #f4f6fb;
+  display: flex; align-items: center; justify-content: center;
+  will-change: transform;
+}
+/* Ink droplet — hidden until the loader mists out, then GSAP drops it from
+   above the viewport onto the screen centre (the hero splash point). */
+.intro-drop {
+  position: absolute; left: 50%; top: 50%;
+  width: 14px; height: 14px; margin: -7px 0 0 -7px;
+  border-radius: 50%; background: #15161a;
+  opacity: 0; will-change: transform;
+}
+
+.intro-meta {
+  position: absolute; left: 0; right: 0; bottom: clamp(26px, 5vh, 54px);
+  display: flex; align-items: flex-end; justify-content: space-between;
+  padding: 0 clamp(22px, 5vw, 64px);
+}
+.intro-name {
+  font-size: 12px; font-weight: 500;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: rgba(244, 246, 251, 0.55);
+}
+.intro-count {
+  font-family: var(--font-condensed, "Saira Extra Condensed", sans-serif);
+  font-weight: 600; line-height: 0.78;
+  font-size: clamp(46px, 9vw, 104px);
+  letter-spacing: -0.02em; font-variant-numeric: tabular-nums;
+}
+.intro-count i {
+  font-style: normal; font-size: 0.32em;
+  margin-left: 0.14em; opacity: 0.55;
+}
+.intro-line {
+  position: absolute; left: 0; right: 0; bottom: 0;
+  height: 2px; background: rgba(244, 246, 251, 0.12); overflow: hidden;
+}
+.intro-line span {
+  display: block; height: 100%; width: 100%;
+  background: #f4f6fb; transform: scaleX(0); transform-origin: left;
+  will-change: transform;
 }
 
 /* ─── Hero Statement (water-trail WebGL hero) ───────
@@ -176,6 +228,7 @@
 .particle-stage {
   position: fixed; inset: 0; z-index: 1;
   display: block; pointer-events: none; opacity: 0;
+  will-change: clip-path;
 }
 .shape-cap {
   position: fixed; z-index: 2; left: 0; top: 0;
@@ -245,7 +298,28 @@
 /* ─── Projects parallax ─────────────────────────────
    ScrollSmoother requires overflow:hidden on wrapper.
    .no-anim fallback for prefers-reduced-motion.      */
-#smooth-wrapper { overflow: hidden; }
+/* z-index:3 lifts the scrolling content above the fixed night sky (z0) and
+   the particle/star canvas (z1) so project cards occlude the stars. */
+#smooth-wrapper { overflow: hidden; z-index: 3; }
+
+/* ─── Projects night sky ────────────────────────────
+   Fixed dark layer behind the particle canvas. Its
+   opacity is scroll-driven from Skills.jsx so the
+   Projects section fades to night and the scattered
+   particles read as a star field. Sits below the
+   canvas (z1) and the content (z3); content is
+   transparent so both show through.                  */
+.night-sky {
+  position: fixed; inset: 0; z-index: 0;
+  background: var(--color-night);
+  opacity: 0; pointer-events: none;
+  will-change: opacity, clip-path;
+}
+
+/* Adaptive nav colour while the night sky is up */
+body.is-dark .nav-menu-btn,
+body.is-dark .nav-eyebrow { color: #f4f6fb; }
+
 
 .no-anim .projects        { min-height: auto; }
 .no-anim .projects-stage  { height: auto; overflow: visible; padding: 18vh 0; }
@@ -257,3 +331,20 @@
   opacity: 1 !important; filter: none !important; transform: none !important;
 }
 .no-anim .project.is-right { margin-left: auto; }
+
+/* "More to come" placeholder card — gentle staggered pulse hints the journey
+   continues without competing with the scroll-driven card animation. */
+.project-placeholder-dots span {
+  animation: project-dot-pulse 1.4s ease-in-out infinite;
+}
+.project-placeholder-dots span:nth-child(2) { animation-delay: 0.2s; }
+.project-placeholder-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes project-dot-pulse {
+  0%, 80%, 100% { opacity: 0.25; transform: scale(0.8); }
+  40% { opacity: 1; transform: scale(1.15); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .project-placeholder-dots span { animation: none; opacity: 0.6; }
+}

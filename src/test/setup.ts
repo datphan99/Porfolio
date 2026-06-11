@@ -34,6 +34,23 @@ class ResizeObserverMock {
 
 window.ResizeObserver = window.ResizeObserver || ResizeObserverMock;
 
+class IntersectionObserverMock {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+  takeRecords() {
+    return [] as IntersectionObserverEntry[];
+  }
+  root = null;
+  rootMargin = "";
+  thresholds = [];
+}
+
+window.IntersectionObserver =
+  window.IntersectionObserver ||
+  (IntersectionObserverMock as unknown as typeof IntersectionObserver);
+globalThis.IntersectionObserver = window.IntersectionObserver;
+
 // jsdom has no canvas rendering context; every getContext caller in the app
 // early-returns on null, so a null stub lets the tree mount without throwing.
 HTMLCanvasElement.prototype.getContext = (() =>

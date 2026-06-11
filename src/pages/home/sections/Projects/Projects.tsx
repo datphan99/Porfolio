@@ -15,13 +15,16 @@ export default function Projects() {
     name: p.name,
     tag: p.role,
     img: p.imageUrl,
+    dashboard: p.dashboard,
+    caseStudyId: p.caseStudyId,
+    placeholder: p.placeholder,
   }));
 
   return (
     <section
       id="work"
       ref={sectionRef}
-      className="projects relative min-h-[680vh]"
+      className="projects relative min-h-[380vh]"
     >
       <div
         ref={stageRef}

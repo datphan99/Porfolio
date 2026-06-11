@@ -26,7 +26,7 @@ export default function MobileSection({ s }: { s: ParticleSection }) {
           </ul>
         </div>
         <div className="list-col">
-          <p className="list-label">We build</p>
+          <p className="list-label">I build</p>
           <ul>
             {s.build.map((item) => (
               <li key={item}>{item}</li>

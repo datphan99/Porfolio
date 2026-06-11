@@ -48,6 +48,12 @@ export interface Project {
   detailUrl: string;
   tags: string;
   year: string;
+  /** When set, the project card links to /case-study/{caseStudyId}. */
+  caseStudyId?: number;
+  /** Renders the live 3D dashboard case-study visual instead of an image. */
+  dashboard?: boolean;
+  /** Renders an "in progress" placeholder card instead of an image. */
+  placeholder?: boolean;
 }
 
 export interface ParticleSection {

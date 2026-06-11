@@ -1,34 +1,46 @@
 [
   {
-    "shape": "techstack",
-    "index": "01 — Tech Stack",
-    "title": "Tech Stack",
-    "desc": "Everything settles into layers — a dependable system of tools and infrastructure built to last and to scale.",
-    "unlock": ["Faster Delivery", "Reliable Performance", "Easy Maintenance", "Room To Scale"],
-    "build": ["Design Systems", "Component Libraries", "Webflow / Framer", "Headless Front-ends"]
+    "shape": "interface",
+    "index": "01 — Interface Design",
+    "title": "Interface Design",
+    "desc": "Where it all takes shape — layout, hierarchy, and motion come together into an interface that feels effortless to use.",
+    "unlock": [
+      "Clear Hierarchy",
+      "Intuitive Flows",
+      "A Consistent System",
+      "Delight In The Detail"
+    ],
+    "build": [
+      "Design Systems",
+      "Wireframes → UI",
+      "Interactive Prototypes",
+      "Motion & Micro-interactions"
+    ]
   },
   {
-    "shape": "creation",
-    "index": "02 — Creation",
-    "title": "Creation",
-    "desc": "We shape raw ideas into living brands — one clear thought multiplying into the first real forms.",
-    "unlock": ["A Clear Direction", "Early Momentum", "Founder Confidence", "A First Identity"],
-    "build": ["Naming & Story", "Logo Marks", "Core Identity", "Brand Foundations"]
+    "shape": "frontend",
+    "index": "02 — Frontend",
+    "title": "Frontend",
+    "desc": "The design comes alive in the browser — pixel-accurate, fast, responsive, and accessible on every screen.",
+    "unlock": [
+      "Pixel-Perfect Builds",
+      "Smooth user experience",
+      "Responsive Everywhere",
+      "Accessible By Default"
+    ],
+    "build": [
+      "React & TypeScript",
+      "GSAP Animation",
+      "Design-to-Code",
+      "Component Libraries"
+    ]
   },
   {
-    "shape": "growth",
-    "index": "03 — Growth",
-    "title": "Growth",
-    "desc": "It expands outward — gathering scale, reach, and momentum as the brand earns its audience.",
-    "unlock": ["Wider Reach", "Repeat Attention", "Market Trust", "Compounding Demand"],
-    "build": ["Campaign Systems", "Content Engines", "Social Presence", "Growth Assets"]
-  },
-  {
-    "shape": "modernization",
-    "index": "04 — Modernization",
-    "title": "Modernization",
-    "desc": "We evolve outdated brands into modern systems, refining design, voice, and digital presence to feel timeless, relevant, and unmistakably clear.",
-    "unlock": ["Relevance Today", "Trust With New Audiences", "Improved Usability", "Digital Readiness"],
-    "build": ["Updated Brand Systems", "Modern Visual Identity", "Clear Digital Experiences", "Platform-Ready Assets"]
+    "shape": "backend",
+    "index": "03 — Backend",
+    "title": "Backend",
+    "desc": "The engine behind the interface — APIs, data, and infrastructure built to stay fast, secure, and ready to scale.",
+    "unlock": ["Reliable APIs", "Secure Data", "Fast Queries", "Room To Scale"],
+    "build": ["Nest.js", "REST APIs", "Databases & Caching", "Auth & Security"]
   }
 ]

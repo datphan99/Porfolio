@@ -8,14 +8,15 @@ import { useGSAP } from "@gsap/react";
 
 import { HomeStageContext } from "./HomeStageContext";
 import { useSmoothScroller } from "./useSmoothScroller";
+import LoadingScreen from "./LoadingScreen";
 
-import Nav from "./sections/Nav/Nav";
 import Hero from "./sections/Hero/Hero";
 import Hello from "./sections/Hello/Hello";
 import Skills from "./sections/Skills/Skills";
 import Projects from "./sections/Projects/Projects";
 import Career from "./sections/Career/Career";
-import { profile } from "../../data/portfolio";
+import Contact from "./sections/Contact/Contact";
+import Footer from "./sections/Footer/Footer";
 
 gsap.registerPlugin(ScrollTrigger, ScrollSmoother, SplitText, Draggable, useGSAP);
 
@@ -29,7 +30,9 @@ export default function HomePage() {
 
   return (
     <HomeStageContext.Provider value={{ canvasRef, capRef, skyRef, cursorRef }}>
-      <Nav />
+      {/* AWWWARDS-style loading curtain — lifts to hand off into the hero reveal */}
+      <LoadingScreen />
+      {/* Nav is rendered by RootLayout so it persists across routes */}
       {/* HeroStatement custom cursor — fixed, outside smooth-wrapper so CSS transform doesn't break it */}
       <div ref={cursorRef} className="hs-cursor" aria-hidden="true" />
       {/* Night sky — fixed dark layer behind the canvas; opacity scroll-driven from Skills.jsx */}
@@ -44,18 +47,9 @@ export default function HomePage() {
         <Skills />
         <Projects />
         <Career />
-        <footer
-          className="flex justify-between items-center px-8 py-7 border-t border-black/[0.08] text-sm text-black/50"
-          id="contact"
-        >
-          <span>{profile.name}</span>
-          <a
-            href={`mailto:${profile.email}`}
-            className="inline-flex items-center gap-1 text-[#111] font-medium transition-opacity duration-200 hover:opacity-[0.65]"
-          >
-            Start a project ↗
-          </a>
-        </footer>
+        <Contact />
+        {/* Night-haze WebGL footer — full-screen closing panel */}
+        <Footer />
       </div>
       </div>
     </HomeStageContext.Provider>

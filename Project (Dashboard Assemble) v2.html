@@ -1,0 +1,398 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Fund Portal — Assemble</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  :root{
+    --page: #eceae6;
+    --ink: #1a1d21;
+    --muted: #6b7280;
+    --line: #e8eaed;
+    --line-2: #eef0f3;
+    --blue: #2563eb;
+    --blue-soft: #eef3ff;
+    --green: #16a34a;
+    --gold: #b08d57;
+    --gray: #9ca3af;
+    --card: #ffffff;
+    --sidebar: #f6f7f9;
+    --ui: "Inter", system-ui, sans-serif;
+  }
+  html, body { margin: 0; height: 100%; }
+  body { font-family: var(--ui); background: var(--page); color: var(--ink);
+    -webkit-font-smoothing: antialiased; display: grid; place-items: center; overflow: hidden; }
+
+  .showcase { position: relative; width: 100vw; height: 100vh; display: grid; place-items: center; overflow: hidden; }
+
+  /* ambient light + vignette behind the board */
+  .bg { position: absolute; inset: 0; pointer-events: none; z-index: 0;
+    background:
+      radial-gradient(58% 48% at 50% 32%, #fcfcfb 0%, rgba(252,252,251,0) 70%),
+      radial-gradient(120% 100% at 50% 50%, rgba(180,176,168,0) 58%, rgba(120,116,108,.14) 100%); }
+
+  .scene { position: relative; z-index: 1; width: 1180px; height: 760px;
+    perspective: 2000px; perspective-origin: 53% 40%; }
+  .camera { position: absolute; inset: 0; transform-style: preserve-3d; will-change: transform; }
+  .board { position: absolute; inset: 0; transform-style: preserve-3d;
+    transform: rotateX(17deg) rotateY(-14deg); will-change: transform; }
+
+  .floor { position: absolute; left: 50%; top: 63%; width: 80%; height: 160px;
+    transform: translate(-50%,0) rotateX(80deg); transform-style: preserve-3d;
+    background: radial-gradient(ellipse at center, rgba(20,22,30,.22), rgba(20,22,30,0) 68%);
+    filter: blur(15px); opacity: 0; }
+
+  .pc { position: absolute; background: var(--card); border: 1px solid var(--line);
+    border-radius: 14px; box-shadow: 0 22px 48px -26px rgba(22,28,45,.5), 0 2px 8px -4px rgba(22,28,45,.16);
+    transform-style: preserve-3d; will-change: transform, opacity; opacity: 0; overflow: hidden; }
+  .pc .pad { padding: 16px 18px; height: 100%; }
+
+  .sidebar { left: 0; top: 0; width: 250px; height: 100%; background: var(--sidebar);
+    border-radius: 16px; border-color: var(--line-2); }
+  .sb-brand { display: flex; align-items: center; gap: 11px; padding: 18px 18px 14px; }
+  .sb-logo { width: 32px; height: 32px; border-radius: 8px; background: var(--ink); display: grid; place-items: center; flex: none; }
+  .sb-logo svg { width: 18px; height: 18px; color: #fff; }
+  .sb-brand .t { font-size: 14px; font-weight: 700; letter-spacing: -.01em; display: block; }
+  .sb-brand .s { font-size: 11px; color: var(--muted); margin-top: 1px; display: block; }
+  .sb-sec { font-size: 10px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: #9aa0a8; padding: 14px 18px 7px; }
+  .sb-item { display: flex; align-items: center; gap: 11px; margin: 2px 12px; padding: 9px 12px; border-radius: 9px;
+    font-size: 13px; font-weight: 500; color: #4b5158; will-change: transform, opacity; }
+  .sb-item.on { background: var(--blue-soft); color: var(--blue); font-weight: 600; }
+  .sb-item .ic { width: 16px; height: 16px; flex: none; opacity: .85; }
+  .sb-item.on .ic { opacity: 1; }
+
+  .header { left: 286px; top: 0; width: 894px; height: 70px; border: 0; background: none; box-shadow: none; }
+  .header .h1 { font-size: 26px; font-weight: 700; letter-spacing: -.02em; }
+  .header .sub { font-size: 12.5px; color: var(--muted); margin-top: 3px; }
+
+  .kpi { width: 210px; height: 132px; top: 92px; }
+  .kpi.k1 { left: 286px; border-top: 2px solid var(--gold); }
+  .kpi.k2 { left: 514px; }
+  .kpi.k3 { left: 742px; }
+  .kpi.k4 { left: 970px; }
+  .kpi .lab { font-size: 11.5px; color: var(--muted); font-weight: 500; }
+  .kpi .val { font-size: 30px; font-weight: 700; letter-spacing: -.02em; margin-top: 7px; font-variant-numeric: tabular-nums; }
+  .kpi .foot { display: flex; align-items: flex-end; justify-content: space-between; margin-top: 12px; }
+  .kpi .delta { font-size: 12px; font-weight: 600; }
+  .kpi .delta.up { color: var(--green); }
+  .kpi .spark { width: 76px; height: 26px; }
+  .kpi .note { font-size: 11.5px; color: var(--muted); }
+  .kpi .bar { width: 76px; height: 2px; background: var(--green); border-radius: 2px; }
+
+  .chart { left: 286px; top: 244px; width: 560px; height: 330px; }
+  .chart .lab { font-size: 12.5px; color: var(--muted); }
+  .chart .val { font-size: 30px; font-weight: 700; letter-spacing: -.02em; margin-top: 4px; font-variant-numeric: tabular-nums; }
+  .chart .val em { font-style: normal; font-size: 14px; font-weight: 600; color: var(--green); margin-left: 8px; }
+  .chart .seg { position: absolute; right: 18px; top: 18px; display: flex; background: #f1f3f6; border-radius: 8px; padding: 3px; }
+  .chart .seg span { font-size: 11px; font-weight: 600; color: var(--muted); padding: 4px 10px; border-radius: 6px; }
+  .chart .seg span.on { background: #fff; color: var(--ink); box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+  .chart svg.plot { position: absolute; left: 16px; right: 16px; bottom: 40px; width: calc(100% - 32px); }
+  .chart .xaxis { position: absolute; left: 18px; right: 18px; bottom: 16px; display: flex; justify-content: space-between;
+    font-size: 10px; color: #aab0b8; }
+
+  .donut { left: 866px; top: 244px; width: 314px; height: 330px; }
+  .donut .lab { font-size: 14px; font-weight: 700; letter-spacing: -.01em; }
+  .donut .ring { position: relative; width: 150px; height: 150px; margin: 14px auto 8px; }
+  .donut .ring .center { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; }
+  .donut .ring .center .c1 { font-size: 10px; color: var(--muted); }
+  .donut .ring .center .c2 { font-size: 18px; font-weight: 700; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+  .leg { display: flex; align-items: center; justify-content: space-between; font-size: 11.5px; margin-top: 7px; }
+  .leg .l { display: flex; align-items: center; gap: 8px; color: #4b5158; }
+  .leg .dot { width: 8px; height: 8px; border-radius: 2px; flex: none; }
+  .leg .p { font-weight: 600; font-variant-numeric: tabular-nums; }
+
+  /* glass light sweep across the assembled board */
+  .sweep { position: absolute; inset: -25% -10%; z-index: 2; pointer-events: none; opacity: 0;
+    background: linear-gradient(105deg, rgba(255,255,255,0) 43%, rgba(255,255,255,.55) 50%, rgba(255,255,255,0) 57%);
+    will-change: transform, opacity; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pc, .sb-item { opacity: 1 !important; }
+    .floor { opacity: .9 !important; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="showcase">
+    <div class="bg"></div>
+    <div class="scene" data-scene>
+      <div class="camera" data-camera>
+        <div class="board" data-board>
+
+          <div class="floor" data-floor></div>
+
+          <!-- sidebar -->
+          <div class="pc sidebar" data-pc data-depth="1">
+            <div class="sb-brand">
+              <span class="sb-logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l5-6 4 4 5-8 4 5"/></svg></span>
+              <span><span class="t">Fund Portal</span><span class="s">Northcrest Capital</span></span>
+            </div>
+            <div class="sb-item on"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Overview</div>
+            <div class="sb-sec">Operations</div>
+            <div class="sb-item"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>Orders</div>
+            <div class="sb-item"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2 2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>Funds</div>
+            <div class="sb-item"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 1l4 4-4 4M3 11V9a4 4 0 0 1 4-4h14M7 23l-4-4 4-4M21 13v2a4 4 0 0 1-4 4H3"/></svg>Transactions</div>
+            <div class="sb-item"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 3h5v5M21 3l-7 7M8 21H3v-5M3 21l7-7"/></svg>Transfers</div>
+            <div class="sb-sec">Records</div>
+            <div class="sb-item"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>Assets</div>
+            <div class="sb-item"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Export history</div>
+          </div>
+
+          <!-- header -->
+          <div class="pc header" data-pc data-depth="2">
+            <div class="h1">Overview</div>
+            <div class="sub">Portfolio health across all funds · Jun 02, 2026</div>
+          </div>
+
+          <!-- KPI cards -->
+          <div class="pc kpi k1" data-pc data-depth="3">
+            <div class="pad">
+              <div class="lab">Total AUM</div>
+              <div class="val" id="cAUM">$2.84B</div>
+              <div class="foot"><span class="delta up">↑ +3.2%</span>
+                <svg class="spark" viewBox="0 0 76 26" fill="none" stroke="var(--green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 20 12 16 22 18 33 11 44 13 55 6 66 8 75 2"/></svg></div>
+            </div>
+          </div>
+          <div class="pc kpi k2" data-pc data-depth="3">
+            <div class="pad">
+              <div class="lab">Net inflows · MTD</div>
+              <div class="val" id="cIN">$48.6M</div>
+              <div class="foot"><span class="delta up">↑ +12.4%</span>
+                <svg class="spark" viewBox="0 0 76 26" fill="none" stroke="var(--green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 22 12 18 22 20 33 12 44 15 55 8 66 10 75 3"/></svg></div>
+            </div>
+          </div>
+          <div class="pc kpi k3" data-pc data-depth="3">
+            <div class="pad">
+              <div class="lab">Pending approvals</div>
+              <div class="val" id="cPEND">12</div>
+              <div class="foot"><span class="note">4 new today</span>
+                <svg class="spark" viewBox="0 0 76 26" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 13 9 9 16 17 24 7 32 15 40 8 48 18 56 10 64 16 75 12"/></svg></div>
+            </div>
+          </div>
+          <div class="pc kpi k4" data-pc data-depth="3">
+            <div class="pad">
+              <div class="lab">Active funds</div>
+              <div class="val" id="cACT">5</div>
+              <div class="foot"><span class="note">All compliant</span><span class="bar"></span></div>
+            </div>
+          </div>
+
+          <!-- NAV chart -->
+          <div class="pc chart" data-pc data-depth="4">
+            <div class="pad">
+              <div class="lab">Aggregate NAV index · 12 months</div>
+              <div class="val"><span id="cNAV">116.8</span><em>+16.8%</em></div>
+              <div class="seg"><span>3M</span><span>6M</span><span class="on">12M</span></div>
+            </div>
+            <svg class="plot" viewBox="0 0 528 150" preserveAspectRatio="none" fill="none">
+              <defs><linearGradient id="fill" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#2563eb" stop-opacity=".16"/><stop offset="1" stop-color="#2563eb" stop-opacity="0"/>
+              </linearGradient></defs>
+              <path id="navfill" d="M0 120 44 116 88 112 132 118 176 96 220 100 264 84 308 88 352 64 396 70 440 44 484 30 528 14 528 150 0 150Z" fill="url(#fill)"/>
+              <path id="navline" d="M0 120 44 116 88 112 132 118 176 96 220 100 264 84 308 88 352 64 396 70 440 44 484 30 528 14" stroke="#2563eb" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              <circle id="navdot" cx="528" cy="14" r="4" fill="#2563eb"/>
+            </svg>
+            <div class="xaxis"><span>Jul</span><span>Sep</span><span>Nov</span><span>Jan</span><span>Mar</span><span>May</span></div>
+          </div>
+
+          <!-- donut -->
+          <div class="pc donut" data-pc data-depth="4">
+            <div class="pad">
+              <div class="lab">Asset allocation</div>
+              <div class="ring">
+                <svg viewBox="0 0 42 42" width="150" height="150">
+                  <circle cx="21" cy="21" r="15.915" fill="none" stroke="#e9ebee" stroke-width="6"/>
+                  <g transform="rotate(-90 21 21)">
+                    <circle class="dseg d-eq" cx="21" cy="21" r="15.915" fill="none" stroke="var(--blue)" stroke-width="6" stroke-dasharray="0 100" stroke-dashoffset="0"/>
+                    <circle class="dseg d-fi" cx="21" cy="21" r="15.915" fill="none" stroke="var(--gold)" stroke-width="6" stroke-dasharray="0 100" stroke-dashoffset="-46"/>
+                    <circle class="dseg d-ca" cx="21" cy="21" r="15.915" fill="none" stroke="var(--gray)" stroke-width="6" stroke-dasharray="0 100" stroke-dashoffset="-74"/>
+                    <circle class="dseg d-al" cx="21" cy="21" r="15.915" fill="none" stroke="var(--green)" stroke-width="6" stroke-dasharray="0 100" stroke-dashoffset="-88"/>
+                  </g>
+                </svg>
+                <div class="center"><div><div class="c1">Total AUM</div><div class="c2" id="cDON">$2.84B</div></div></div>
+              </div>
+              <div class="leg"><span class="l"><span class="dot" style="background:var(--blue)"></span>Equity</span><span class="p">46%</span></div>
+              <div class="leg"><span class="l"><span class="dot" style="background:var(--gold)"></span>Fixed income</span><span class="p">28%</span></div>
+              <div class="leg"><span class="l"><span class="dot" style="background:var(--gray)"></span>Cash</span><span class="p">14%</span></div>
+              <div class="leg"><span class="l"><span class="dot" style="background:var(--green)"></span>Alternatives</span><span class="p">12%</span></div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+      <div class="sweep" data-sweep></div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script>
+  (function () {
+    var q = function (s, r) { return (r || document).querySelector(s); };
+    var qa = function (s, r) { return [].slice.call((r || document).querySelectorAll(s)); };
+
+    var scene  = q('[data-scene]');
+    var camera = q('[data-camera]');
+    var board  = q('[data-board]');
+    var floor  = q('[data-floor]');
+    var sweep  = q('[data-sweep]');
+
+    var sidebar  = q('.sidebar');
+    var header   = q('.header');
+    var kpis     = qa('.kpi');
+    var chart    = q('.chart');
+    var donut    = q('.donut');
+    var navItems = qa('.sb-item');
+    var pieces   = qa('[data-pc]');
+
+    /* fit the 1180×760 scene into any viewport, optically centered.
+       The 3D tilt pushes the visual mass up & right, so nudge it back. */
+    function fit() {
+      var pad = 0.86;
+      var s = Math.min(window.innerWidth / 1180, window.innerHeight / 760) * pad;
+      var txScreen = -8;   // shift left
+      var tyScreen = 40;   // shift down to balance the empty bottom band
+      scene.style.transform =
+        'translate(' + (txScreen / s) + 'px,' + (tyScreen / s) + 'px) scale(' + s + ')';
+    }
+    fit(); window.addEventListener('resize', fit);
+
+    var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    /* ---- live-data helpers ------------------------------------------- */
+    var fmt = {
+      aum:  function (v) { return '$' + v.toFixed(2) + 'B'; },
+      infl: function (v) { return '$' + v.toFixed(1) + 'M'; },
+      int:  function (v) { return String(Math.round(v)); },
+      nav:  function (v) { return v.toFixed(1); }
+    };
+    var NUMS = [
+      { el: q('#cAUM'),  to: 2.84,  f: fmt.aum,  at: 1.45, d: 1.1 },
+      { el: q('#cIN'),   to: 48.6,  f: fmt.infl, at: 1.55, d: 1.1 },
+      { el: q('#cPEND'), to: 12,    f: fmt.int,  at: 1.55, d: 0.9 },
+      { el: q('#cACT'),  to: 5,     f: fmt.int,  at: 1.65, d: 0.9 },
+      { el: q('#cNAV'),  to: 116.8, f: fmt.nav,  at: 1.75, d: 1.2 },
+      { el: q('#cDON'),  to: 2.84,  f: fmt.aum,  at: 1.95, d: 1.1 }
+    ];
+
+    /* donut sweep */
+    var DSEG = [['.d-eq',0,46],['.d-fi',46,28],['.d-ca',74,14],['.d-al',88,12]]
+      .map(function (s) { return { el: q(s[0]), start: s[1], len: s[2] }; });
+    function drawDonut(p) {
+      var total = p * 100;
+      DSEG.forEach(function (s) {
+        var len = Math.max(0, Math.min(s.len, total - s.start));
+        s.el.setAttribute('stroke-dasharray', len + ' 100');
+      });
+    }
+
+    /* reduced-motion: render the finished dashboard, no motion */
+    if (!window.gsap || reduce) {
+      pieces.forEach(function (p) { p.style.opacity = 1; p.style.transform = 'none'; });
+      navItems.forEach(function (n) { n.style.opacity = 1; });
+      floor.style.opacity = 0.9;
+      drawDonut(1);
+      return;
+    }
+
+    NUMS.forEach(function (n) { n.el.textContent = n.f(0); });
+    drawDonut(0);
+
+    var navline = q('#navline'), navLen = navline.getTotalLength();
+    var sparks  = qa('.spark path');
+
+    gsap.set(pieces, { opacity: 0 });
+    gsap.set(navline, { strokeDasharray: navLen, strokeDashoffset: navLen });
+    gsap.set('#navfill', { opacity: 0 });
+    gsap.set('#navdot', { transformOrigin: '50% 50%', scale: 0 });
+    sparks.forEach(function (p) { var L = p.getTotalLength(); gsap.set(p, { strokeDasharray: L, strokeDashoffset: L }); });
+
+    function countUp(n) {
+      var o = { v: 0 };
+      tl.to(o, { v: n.to, duration: n.d, ease: 'power2.out',
+        onUpdate: function () { n.el.textContent = n.f(o.v); } }, n.at);
+    }
+
+    var tl = gsap.timeline({ repeat: -1, repeatDelay: 0.55, defaults: { ease: 'power3.out' } });
+
+    /* reset transient visuals at the top of every loop */
+    tl.add(function () {
+      drawDonut(0);
+      NUMS.forEach(function (n) { n.el.textContent = n.f(0); });
+    }, 0);
+
+    /* ---- CAMERA: dolly in, then a slow hero push ---------------------- */
+    tl.fromTo(camera, { z: -260, y: 46, rotateX: 4 },
+                      { z: 0, y: 0, rotateX: 0, duration: 1.9, ease: 'power3.out' }, 0)
+      .fromTo(board, { rotateY: -23, rotateX: 23 },
+                     { rotateY: -14, rotateX: 17, duration: 1.9, ease: 'power3.out' }, 0);
+
+    /* ---- ASSEMBLE: direction-aware entrances -------------------------- */
+    tl.fromTo(sidebar, { opacity: 0, x: -160, rotateY: -34, z: 8 },
+                       { opacity: 1, x: 0, rotateY: 0, z: 8, duration: 1.0 }, 0.15)
+      .fromTo(navItems, { opacity: 0, x: -16 },
+                        { opacity: 1, x: 0, duration: 0.45, stagger: 0.055, ease: 'power2.out' }, 0.6)
+      .fromTo(header, { opacity: 0, y: -34 },
+                      { opacity: 1, y: 0, duration: 0.8 }, 0.42);
+
+    kpis.forEach(function (k, i) {
+      tl.fromTo(k, { opacity: 0, y: -210, z: 130, rotateX: -28 },
+                   { opacity: 1, y: 0, z: 24, rotateX: 0, duration: 0.95, ease: 'back.out(1.05)' }, 0.58 + i * 0.11);
+    });
+
+    tl.fromTo(chart, { opacity: 0, y: 96, z: 130, scale: 0.93 },
+                     { opacity: 1, y: 0, z: 32, scale: 1, duration: 1.0 }, 0.78)
+      .fromTo(donut, { opacity: 0, y: 96, x: 34, z: 130, scale: 0.93 },
+                     { opacity: 1, y: 0, x: 0, z: 32, scale: 1, duration: 1.0 }, 0.92)
+      .fromTo(floor, { opacity: 0 }, { opacity: 1, duration: 0.9 }, 0.7);
+
+    /* ---- DATA COMES ALIVE -------------------------------------------- */
+    NUMS.forEach(countUp);
+
+    sparks.forEach(function (p, i) {
+      tl.to(p, { strokeDashoffset: 0, duration: 0.85, ease: 'power2.out' }, 1.55 + i * 0.06);
+    });
+
+    tl.to(navline, { strokeDashoffset: 0, duration: 1.35, ease: 'power2.inOut' }, 1.7)
+      .to('#navfill', { opacity: 1, duration: 1.0 }, 2.05)
+      .to('#navdot', { scale: 1, duration: 0.5, ease: 'back.out(2.2)' }, 2.95)
+      .to('#navdot', { scale: 1.3, duration: 0.45, yoyo: true, repeat: 1, ease: 'sine.inOut' }, 3.45);
+
+    tl.to({ p: 0 }, { p: 1, duration: 1.35, ease: 'power2.inOut',
+      onUpdate: function () { drawDonut(this.targets()[0].p); } }, 1.95);
+
+    /* ---- LIGHT SWEEP across the glass -------------------------------- */
+    tl.fromTo(sweep, { xPercent: -65, opacity: 0 },
+                     { xPercent: 8, opacity: 1, duration: 0.55, ease: 'sine.in' }, 3.25)
+      .to(sweep, { xPercent: 75, opacity: 0, duration: 0.85, ease: 'sine.out' }, 3.8);
+
+    /* ---- HERO HOLD: slow camera push + gentle parallax --------------- */
+    tl.to(camera, { z: 58, duration: 3.0, ease: 'sine.inOut' }, 3.2)
+      .to(board, { rotateY: -16.5, rotateX: 15.6, duration: 3.0, ease: 'sine.inOut' }, 3.2);
+
+    /* ---- EXIT: coordinated lift & dissolve, camera pulls back -------- */
+    tl.to(camera, { z: -130, y: -22, duration: 1.0, ease: 'power2.in' }, 6.7)
+      .to(pieces, { opacity: 0, y: -120, z: 210, rotateX: -22, duration: 0.85, ease: 'power2.in',
+                    stagger: { each: 0.05, from: 'end' } }, 6.8)
+      .to(floor, { opacity: 0, duration: 0.6 }, 6.8);
+
+    window.__tl = tl;
+  })();
+  </script>
+
+  <template id="__bundler_thumbnail">
+    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <rect width="100" height="100" fill="#eceae6"/>
+      <rect x="22" y="30" width="22" height="40" rx="4" fill="#f6f7f9" stroke="#e8eaed"/>
+      <rect x="48" y="30" width="30" height="16" rx="4" fill="#fff" stroke="#e8eaed"/>
+      <path d="M50 64 L58 58 L66 60 L76 50" fill="none" stroke="#2563eb" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </template>
+
+</body>
+</html>

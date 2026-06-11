@@ -61,11 +61,15 @@ export function useMobileParticles(
         context.fillStyle = "#15161a";
         context.globalAlpha = 0.82;
         for (let i = 0; i < N; i++) {
-          // Lively idle shimmer — higher amplitude than desktop
-          const jx = Math.cos(t * 0.9 + seed[i]) * 4.5;
-          const jy = Math.sin(t * 1.15 + seed[i] * 1.4) * 4.5;
-          px[i] += (TX[i] + jx - px[i]) * 0.09;
-          py[i] += (TY[i] + jy - py[i]) * 0.09;
+          // Lively idle shimmer — two layered frequencies for an organic churn
+          const jx =
+            Math.cos(t * 0.9 + seed[i]) * 5.5 +
+            Math.sin(t * 1.7 + seed[i] * 2.3) * 3.2;
+          const jy =
+            Math.sin(t * 1.15 + seed[i] * 1.4) * 5.5 +
+            Math.cos(t * 2.1 + seed[i] * 1.9) * 3.2;
+          px[i] += (TX[i] + jx - px[i]) * 0.11;
+          py[i] += (TY[i] + jy - py[i]) * 0.11;
           context.fillRect(px[i] - 0.75, py[i] - 0.75, 1.5, 1.5);
         }
         raf = requestAnimationFrame(frame);

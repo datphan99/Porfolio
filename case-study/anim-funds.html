@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Funds — reel</title>
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="anim-base.css">
+<style>
+  .funds-bar{ display:flex; align-items:center; margin-bottom:22px; }
+  .funds-count{ font-size:15px; color:var(--colors-ink-muted-48); letter-spacing:-0.01em; }
+  .newbtn{ margin-left:auto; display:flex; align-items:center; gap:8px; background:var(--colors-primary); color:#fff; font-size:14px; font-weight:600; padding:11px 18px; border-radius:999px; }
+
+  .grid{ display:grid; grid-template-columns:1fr 1fr; gap:24px; }
+  .card{ background:#fff; border:1px solid var(--colors-hairline); border-radius:18px; padding:24px 26px 22px; position:relative; will-change:transform; }
+  .card-top{ display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
+  .code-chip{ font-size:13px; font-weight:600; letter-spacing:0.01em; color:var(--colors-primary); background:#eef4fc; padding:5px 11px; border-radius:8px; }
+  .badge{ display:inline-flex; align-items:center; gap:7px; padding:5px 11px; border-radius:999px; font-size:12.5px; font-weight:600; }
+  .b-approved{ background:#e7f5ec; color:#1a7a37; }
+  .b-pending{ background:#fdf3df; color:#9a6700; }
+  .fname{ font-size:21px; font-weight:600; letter-spacing:-0.02em; }
+  .ftype{ margin-top:6px; font-size:14px; color:var(--colors-ink-muted-48); letter-spacing:-0.01em; }
+  .stats{ display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:20px; }
+  .statbox{ border:1px solid var(--colors-hairline); border-radius:12px; padding:14px 16px; position:relative; overflow:hidden; }
+  .stat-l{ font-size:12px; color:var(--colors-ink-muted-48); letter-spacing:-0.01em; }
+  .stat-v{ margin-top:6px; font-size:22px; font-weight:600; letter-spacing:-0.02em; display:flex; align-items:baseline; gap:8px; }
+  .chg{ font-size:13px; font-weight:600; }
+  .chg.up{ color:#1a7a37; } .chg.down{ color:#c4322b; }
+  .spark{ position:absolute; right:12px; bottom:10px; width:78px; height:30px; opacity:.9; }
+  .ring{ position:absolute; inset:-1px; border-radius:18px; border:2px solid var(--colors-primary); opacity:0; pointer-events:none; }
+  .fbtns{ display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:16px; }
+  .fbtn{ height:44px; border-radius:11px; display:flex; align-items:center; justify-content:center; gap:7px; font-size:14px; font-weight:600; letter-spacing:-0.01em; }
+  .fbtn.review{ border:1px solid var(--colors-primary); color:var(--colors-primary); }
+  .fbtn.edit{ border:1px solid var(--colors-hairline); color:var(--colors-ink); }
+</style>
+</head>
+<body>
+<div class="viewport">
+  <div class="stage">
+    <div class="reel">
+      <div class="page">
+        <div class="page-head">
+          <div class="page-title">Funds</div>
+          <div class="page-sub">Open-ended funds under management</div>
+        </div>
+        <div class="funds-bar">
+          <div class="funds-count">5 active funds</div>
+          <div class="newbtn">+ New fund</div>
+        </div>
+        <div class="grid" id="grid"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="anim-runtime.js"></script>
+<script>
+const FUNDS = [
+  { code:'PHVSF', name:'Vietnam Select Equity Fund', type:'Open-ended equity', since:'Nov 21, 2022', nav:24.86, chg:1.4,  aum:842.0, status:'approved', spark:[10,12,11,14,15,14,17,19,18,22,24,26] },
+  { code:'NCBF',  name:'Northcrest Bond Fund',       type:'Fixed income',      since:'Mar 02, 2024', nav:13.42, chg:0.3,  aum:610.4, status:'approved', spark:[12,12,13,12,13,13,13,14,13,14,13,14] },
+  { code:'PHVBF', name:'Balanced Growth Fund',       type:'Balanced',          since:'Jul 17, 2023', nav:18.07, chg:0.9,  aum:498.2, status:'pending',  spark:[14,15,14,16,16,15,17,17,18,17,18,18] },
+  { code:'PHGF',  name:'Dynamic Allocation Fund',    type:'Multi-asset',       since:'May 09, 2024', nav:16.93, chg:2.1,  aum:379.1, status:'approved', spark:[9,10,11,10,12,13,12,14,15,14,16,17] },
+];
+
+const grid = document.getElementById('grid');
+function sparkPath(arr){
+  const w=78,h=30,max=Math.max(...arr),min=Math.min(...arr),rng=(max-min)||1;
+  return arr.map((v,i)=>{ const x=(i/(arr.length-1))*w; const y=h-((v-min)/rng)*(h-4)-2; return (i?'L':'M')+x.toFixed(1)+' '+y.toFixed(1); }).join(' ');
+}
+FUNDS.forEach((f,i)=>{
+  const card=document.createElement('div'); card.className='card'; card.dataset.i=i;
+  card.innerHTML=`
+    <div class="ring"></div>
+    <div class="card-top">
+      <span class="code-chip">${f.code}</span>
+      <span class="badge b-${f.status}"><span class="dot" style="background:currentColor"></span>${f.status==='approved'?'Approved':'Pending'}</span>
+    </div>
+    <div class="fname">${f.name}</div>
+    <div class="ftype">${f.type} · since ${f.since}</div>
+    <div class="stats">
+      <div class="statbox">
+        <div class="stat-l">NAV / unit</div>
+        <div class="stat-v"><span class="tnum" data-nav>$0.00</span><span class="chg ${f.chg>=0?'up':'down'}">${f.chg>=0?'+':''}${f.chg}%</span></div>
+      </div>
+      <div class="statbox">
+        <div class="stat-l">AUM</div>
+        <div class="stat-v"><span class="tnum" data-aum>$0.0M</span></div>
+      </div>
+    </div>
+    <div class="fbtns"><div class="fbtn review">Review</div><div class="fbtn edit">✎ Edit</div></div>`;
+  grid.appendChild(card);
+});
+
+const cards=[...grid.querySelectorAll('.card')];
+const E=Reel.ease, kf=Reel.kf, step=Reel.step;
+
+Reel.start(function(t){
+  cards.forEach((card,i)=>{
+    const t0=0.3+i*0.12;
+    const p=step(t,t0,t0+0.7,E.out);
+    card.style.opacity=p;
+    card.style.transform=`translateY(${(1-p)*22}px)`;
+
+    // count-up nav & aum
+    const f=FUNDS[i];
+    const cp=step(t,t0+0.2,t0+1.6,E.out);
+    let nav=f.nav*cp;
+    // subtle live tick after settle
+    if(cp>=1){ nav=f.nav + Math.sin((t+i)*2.0)*0.01; }
+    card.querySelector('[data-nav]').textContent='$'+nav.toFixed(2);
+    card.querySelector('[data-aum]').textContent='$'+(f.aum*cp).toFixed(1)+'M';
+
+    // sparkline removed in favor of Review/Edit actions
+
+    // review ring sweep
+    const rs=2.4+i*1.45;
+    const ringP=kf(t,[[rs,0],[rs+0.25,1],[rs+1.0,1],[rs+1.25,0]],E.out);
+    card.querySelector('.ring').style.opacity=ringP;
+    const lift=kf(t,[[rs,0],[rs+0.25,1],[rs+1.0,1],[rs+1.25,0]],E.inOut);
+    card.style.transform=`translateY(${(1-p)*22 - lift*5}px)`;
+  });
+});
+</script>
+</body>
+</html>

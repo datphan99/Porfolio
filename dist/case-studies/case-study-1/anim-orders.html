@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Orders — reel</title>
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="anim-base.css">
+<style>
+  .ord-tabs{ display:flex; align-items:center; gap:26px; margin-bottom:20px; }
+  .ord-tab{ font-size:16px; color:var(--colors-ink-muted-48); letter-spacing:-0.01em; position:relative; padding-bottom:10px; display:flex; align-items:center; gap:8px; }
+  .ord-tab.active{ color:var(--colors-ink); font-weight:600; }
+  .ord-tab.active::after{ content:""; position:absolute; left:0; right:0; bottom:0; height:2px; background:var(--colors-primary); border-radius:2px; }
+  .count-chip{ position:relative; min-width:20px; height:20px; padding:0 6px; border-radius:999px; background:#c4322b; color:#fff; font-size:11px; font-weight:600; display:inline-flex; align-items:center; justify-content:center; }
+  .count-chip span{ position:absolute; }
+  .newbtn{ margin-left:auto; display:flex; align-items:center; gap:8px; background:var(--colors-primary); color:#fff; font-size:14px; font-weight:600; letter-spacing:-0.01em; padding:11px 18px; border-radius:999px; }
+
+  .table{ background:#fff; border:1px solid var(--colors-hairline); border-radius:14px; overflow:hidden; }
+  .trow{ display:grid; grid-template-columns:160px 76px 1fr 90px 124px 132px 96px; column-gap:16px; align-items:center; padding:0 26px; height:62px; border-bottom:1px solid var(--colors-divider-soft); position:relative; }
+  .trow:last-child{ border-bottom:none; }
+  .thead{ height:50px; background:#fcfcfd; }
+  .th{ font-size:11.5px; font-weight:600; letter-spacing:0.04em; text-transform:uppercase; color:var(--colors-ink-muted-48); white-space:nowrap; }
+  .td{ font-size:15px; letter-spacing:-0.01em; white-space:nowrap; }
+  .td.id{ font-weight:600; }
+  .td.amt{ text-align:right; font-weight:600; }
+  .side-buy{ color:#1a8a3c; font-weight:600; }
+  .side-sell{ color:#c4322b; font-weight:600; }
+  .inv-sub{ color:var(--colors-ink-muted-48); }
+  .badge{ display:inline-flex; align-items:center; gap:7px; padding:5px 11px; border-radius:999px; font-size:13px; font-weight:600; letter-spacing:-0.01em; }
+  .b-pending{ background:#fdf3df; color:#9a6700; }
+  .b-approved{ background:#e7f5ec; color:#1a7a37; }
+  .b-rejected{ background:#fbecea; color:#c4322b; }
+  .b-settled{ background:#eaf1fb; color:#2f6db0; }
+  .act{ font-size:14px; font-weight:600; color:var(--colors-primary); display:flex; align-items:center; gap:4px; justify-content:flex-end; }
+  .act.muted{ color:#8aa6c6; }
+  .stack{ position:relative; display:inline-flex; }
+  .stack > *{ }
+  .stack .layer{ position:absolute; left:0; top:50%; transform:translateY(-50%); }
+
+  .rowglow{ position:absolute; inset:0; background:rgba(0,102,204,0.06); opacity:0; pointer-events:none; }
+
+  .cursor{ position:absolute; left:0; top:0; width:26px; height:26px; z-index:30; opacity:0; will-change:transform,opacity; }
+  .ripple{ position:absolute; width:46px; height:46px; border-radius:50%; border:2px solid var(--colors-primary); opacity:0; z-index:29; transform:translate(-50%,-50%) scale(0.3); }
+
+  .toast{ position:absolute; left:50%; bottom:34px; transform:translateX(-50%) translateY(30px); z-index:40; opacity:0;
+    background:var(--colors-ink); color:#fff; font-size:15px; font-weight:500; letter-spacing:-0.01em;
+    padding:13px 20px; border-radius:999px; display:flex; align-items:center; gap:10px; white-space:nowrap; }
+  .toast .ck{ width:18px; height:18px; }
+</style>
+</head>
+<body>
+<div class="viewport">
+  <div class="stage">
+    <div class="reel">
+      <div class="page">
+        <div class="page-head">
+          <div class="page-title">Orders</div>
+          <div class="page-sub">Subscription &amp; redemption orders awaiting action</div>
+        </div>
+
+        <div class="ord-tabs">
+          <div class="ord-tab active">All</div>
+          <div class="ord-tab">Pending
+            <span class="count-chip"><span id="c3">3</span><span id="c2" style="opacity:0">2</span><span id="c1" style="opacity:0">1</span></span>
+          </div>
+          <div class="ord-tab">Approved</div>
+          <div class="ord-tab">Settled</div>
+          <div class="newbtn">+ New order</div>
+        </div>
+
+        <div class="table" id="table">
+          <div class="trow thead">
+            <div class="th">Order</div><div class="th">Type</div><div class="th">Investor</div>
+            <div class="th">Fund</div><div class="th" style="text-align:right">Amount</div><div class="th">Status</div><div class="th"></div>
+          </div>
+          <!-- rows injected -->
+        </div>
+      </div>
+
+      <div class="ripple" id="ripple"></div>
+      <svg class="cursor" id="cursor" viewBox="0 0 24 24" fill="none">
+        <path d="M5 3l14 8-6 1.4L9.8 18 5 3z" fill="#0a0a0a" stroke="#fff" stroke-width="1.4" stroke-linejoin="round"/>
+      </svg>
+
+      <div class="toast" id="toast1"><svg class="ck" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#34c759"/><path d="M7.5 12.3l3 3 6-6.5" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Approved ORD-008542 · James Carter</span></div>
+      <div class="toast" id="toast2"><svg class="ck" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" fill="#34c759"/><path d="M7.5 12.3l3 3 6-6.5" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Approved ORD-008538 · Michael Tran</span></div>
+    </div>
+  </div>
+</div>
+
+<script src="anim-runtime.js"></script>
+<script>
+const ROWS = [
+  { id:'ORD-008542', side:'buy',  name:'James Carter',   fund:'PHVSF', amt:'$120,000', status:'pending',  approve:1 },
+  { id:'ORD-008541', side:'sell', name:'Olivia Bennett', fund:'NCBF',  amt:'$45,000',  status:'approved' },
+  { id:'ORD-008540', side:'buy',  name:'Daniel Foster',  fund:'PHBF',  amt:'$300,000', status:'approved' },
+  { id:'ORD-008539', side:'sell', name:'Sophia Nguyen',  fund:'PHVBF', amt:'$78,500',  status:'rejected' },
+  { id:'ORD-008538', side:'buy',  name:'Michael Tran',   fund:'PHGF',  amt:'$15,000',  status:'pending',  approve:2 },
+  { id:'ORD-008537', side:'buy',  name:'Emma Larsson',   fund:'PHVSF', amt:'$500,000', status:'approved' },
+];
+const badgeLabel = { pending:'Pending', approved:'Approved', rejected:'Rejected', settled:'Settled' };
+const table = document.getElementById('table');
+ROWS.forEach((r,i) => {
+  const row = document.createElement('div');
+  row.className = 'trow';
+  row.dataset.i = i;
+  const actText = r.status === 'pending' ? 'Review' : 'Open';
+  const actClass = r.status === 'pending' ? 'act' : 'act muted';
+  let statusHTML;
+  if (r.approve){
+    statusHTML = `<div class="stack">
+        <span class="layer badge b-pending" data-pending>● Pending</span>
+        <span class="layer badge b-approved" data-approved style="opacity:0">✓ Approved</span>
+      </div>`;
+  } else {
+    statusHTML = `<span class="badge b-${r.status}">● ${badgeLabel[r.status]}</span>`;
+  }
+  row.innerHTML = `
+    <div class="rowglow"></div>
+    <div class="td id">${r.id}</div>
+    <div class="td side-${r.side}">${r.side==='buy'?'Buy':'Sell'}</div>
+    <div class="td">${r.name}</div>
+    <div class="td">${r.fund}</div>
+    <div class="td amt tnum">${r.amt}</div>
+    <div class="td">${statusHTML}</div>
+    <div class="${actClass}" data-act>${actText} ›</div>`;
+  table.appendChild(row);
+});
+// fix the ● glyph styling: replace with dot spans
+document.querySelectorAll('.badge').forEach(b=>{
+  b.innerHTML = b.innerHTML.replace('●','<span class="dot" style="background:currentColor"></span>').replace('✓','<span style="font-weight:700">✓</span>');
+});
+
+const rows = [...table.querySelectorAll('.trow:not(.thead)')];
+const cursor = document.getElementById('cursor');
+const ripple = document.getElementById('ripple');
+const toast1 = document.getElementById('toast1');
+const toast2 = document.getElementById('toast2');
+const c3 = document.getElementById('c3'), c2 = document.getElementById('c2'), c1 = document.getElementById('c1');
+
+// geometry: table top within stage
+const TABLE_TOP = 286;     // px from stage top to header start
+const HEAD_H = 50, ROW_H = 62;
+function rowCenterY(i){ return TABLE_TOP + HEAD_H + i*ROW_H + ROW_H/2; }
+const ACT_X = 1086;        // action column x (cursor tip target)
+
+const E = Reel.ease, kf = Reel.kf, step = Reel.step;
+
+Reel.start(function(t){
+  // rows reveal
+  rows.forEach((row,i)=>{
+    const p = step(t, 0.3 + i*0.07, 0.95 + i*0.07, E.out);
+    row.style.opacity = p;
+    row.style.transform = `translateY(${(1-p)*14}px)`;
+  });
+
+  // cursor path: idle -> row0 action (click ~2.3) -> row4 action (click ~5.3)
+  const y0 = rowCenterY(0), y4 = rowCenterY(4);
+  const cx = kf(t, [[1.2,1140],[1.9,ACT_X],[2.3,ACT_X],[3.6,1120],[4.6,ACT_X],[5.3,ACT_X],[6.8,1160]], E.inOut);
+  const cy = kf(t, [[1.2,180],[1.9,y0],[2.3,y0],[3.6,360],[4.6,y4],[5.3,y4],[6.8,200]], E.inOut);
+  const cOp = kf(t, [[1.0,0],[1.3,1],[7.2,1],[7.8,0]], E.linear);
+  cursor.style.opacity = cOp;
+  cursor.style.transform = `translate(${cx}px, ${cy-4}px)`;
+
+  // click ripples
+  function ripFx(tc, x, y){
+    const p = step(t, tc, tc+0.5, E.out);
+    if (t>=tc && t<=tc+0.5){
+      ripple.style.left = x+'px'; ripple.style.top = y+'px';
+      ripple.style.opacity = (1-p)*0.8;
+      ripple.style.transform = `translate(-50%,-50%) scale(${0.3+p*1.0})`;
+    }
+  }
+  ripFx(2.35, ACT_X, y0); ripFx(5.35, ACT_X, y4);
+
+  // row glow during action
+  rows[0].querySelector('.rowglow').style.opacity = kf(t,[[1.9,0],[2.3,1],[3.4,1],[4.0,0]],E.linear);
+  rows[4].querySelector('.rowglow').style.opacity = kf(t,[[4.6,0],[5.0,1],[6.2,1],[6.8,0]],E.linear);
+
+  // badge flips
+  function flip(row, tFlip){
+    const pend = row.querySelector('[data-pending]');
+    const appr = row.querySelector('[data-approved]');
+    const act = row.querySelector('[data-act]');
+    pend.style.opacity = kf(t,[[tFlip,1],[tFlip+0.25,0]],E.linear);
+    const ap = step(t, tFlip+0.05, tFlip+0.45, E.outBack);
+    appr.style.opacity = t>=tFlip+0.05 ? Math.min(1,(t-(tFlip+0.05))/0.25) : 0;
+    appr.style.transform = `translateY(-50%) scale(${0.7 + 0.3*ap})`;
+    // action becomes muted "Open"
+    if (t >= tFlip+0.2){ act.textContent = 'Open ›'; act.className='act muted'; }
+    else { act.textContent = 'Review ›'; act.className='act'; }
+  }
+  flip(rows[0], 2.45);
+  flip(rows[4], 5.45);
+
+  // pending count 3 -> 2 -> 1
+  c3.style.opacity = t < 2.45 ? 1 : 0;
+  c2.style.opacity = (t >= 2.45 && t < 5.45) ? 1 : 0;
+  c1.style.opacity = t >= 5.45 ? 1 : 0;
+
+  // toasts
+  function toast(el, tIn){
+    const inP = step(t, tIn, tIn+0.4, E.outBack);
+    const outP = step(t, tIn+1.6, tIn+2.0, E.in || E.linear);
+    const op = Math.min(inP, 1-outP);
+    el.style.opacity = op;
+    el.style.transform = `translateX(-50%) translateY(${(1-inP)*30}px)`;
+  }
+  toast(toast1, 2.5);
+  toast(toast2, 5.5);
+});
+</script>
+</body>
+</html>

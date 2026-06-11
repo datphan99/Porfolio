@@ -20,10 +20,13 @@ Run a single test file: `npx vitest run src/App.test.tsx`
 
 ## Architecture
 
-This is a single-route React + TypeScript portfolio built with Vite. The app is a routed page split into per-section folders:
+This is a React + TypeScript portfolio built with Vite, with two routes behind a shared layout:
 
-- **`src/App.tsx`** — the router root: `createBrowserRouter([{ path: "/", element: <HomePage /> }])` + `<RouterProvider>`. There is exactly **one** route (`/`).
-- **`src/pages/home/HomePage.tsx`** — the page. Owns the shared "stage" refs, provides `HomeStageContext`, registers GSAP plugins at module scope, and renders the fixed stage layers + the 6 sections + footer inside `#smooth-wrapper > #smooth-content`.
+- **`src/App.tsx`** — the router root: a `RootLayout` route with two **lazy** children — `/` → `HomePage`, `/case-study/:id` → `CaseStudyPage` (route-level code-splitting).
+- **`src/RootLayout.tsx`** — persistent shell: renders the shared `Nav` (with `linkBase` per route) and wraps `<Outlet/>` in `MistProvider`. Registers the shared `ScrollTrigger` plugin at module scope (Nav needs it before any lazy page chunk loads); pages register their fuller plugin sets on top.
+- **`src/transition/`** — the mist page transition: `MistTransition.tsx` (provider + `useMistNavigate()`; WebGL fog covers, route swaps under full fog, fog dissolves) and `mistGL.ts` (fbm-noise fog shader). Only one page — and therefore one ScrollSmoother — is alive at a time; never cross-fade two mounted pages.
+- **`src/pages/home/HomePage.tsx`** — the home page. Owns the shared "stage" refs, provides `HomeStageContext`, registers GSAP plugins at module scope, and renders the fixed stage layers + sections + footer inside `#smooth-wrapper > #smooth-content` (Nav is rendered by `RootLayout`, not here).
+- **`src/pages/case-study/`** — JSON-driven case-study page (`CaseStudyPage.tsx` fetches `/case-studies/case-study-{id}/case.json`, injects route-scoped `case.css`, renders `sections/`; `useCaseStudyMotion.ts` owns its ScrollSmoother + scroll choreography). Content lives in self-contained `public/case-studies/case-study-{n}/` folders; reels are iframes.
 - **`src/pages/home/sections/<Name>/`** — each animated section is a folder: `<Name>.tsx` (UI / render) + one or more `use<Name>...` hooks (animation logic). Shared sub-components sit beside them (`Projects/ProjectCard.tsx`, `Skills/MobileSection.tsx`). Extracted constants live in helper modules (`Hero/heroShaders.ts`, `Skills/particles.ts`). Sections: `Nav`, `Hero`, `Hello`, `Skills`, `Projects`, `Career`.
 - **`src/pages/home/useSmoothScroller.ts`** — `ScrollSmoother.create(...)` init + cleanup, called from `HomePage`.
 - **`src/data/portfolio.ts`** — the only content to edit: `profile`, `navLinks`, `showcaseItems`, `helloPills`, `skills`, `careerEntries`, `projects` exports.

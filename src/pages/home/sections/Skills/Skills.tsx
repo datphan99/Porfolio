@@ -41,7 +41,7 @@ export default function Skills() {
                   </ul>
                 </div>
                 <div className="list-col">
-                  <p className="list-label">We build</p>
+                  <p className="list-label">I build</p>
                   <ul>
                     {s.build.map((item) => (
                       <li key={item}>{item}</li>

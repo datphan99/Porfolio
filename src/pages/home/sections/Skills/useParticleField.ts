@@ -30,6 +30,11 @@ export function useParticleField(refs: {
     const context = ctx;
 
     const skyEl = skyRef.current;
+    // Pinned Projects stage — clipped to the same doorway as the sky/stars on
+    // exit so its cards + statement (z3, above the canvas) can't spill outside
+    // the closing gate. Cross-section DOM query, consistent with the Hello
+    // bridge below.
+    const stageEl = document.querySelector<HTMLElement>(".projects-stage");
     const DPR = Math.min(2, window.devicePixelRatio || 1);
     let W = 0,
       H = 0;
@@ -80,6 +85,15 @@ export function useParticleField(refs: {
     let enterP = 0, // 0→1 burst-in as Projects scrolls into view
       spanP = 0, // 0→1 across the pinned Projects span
       darkOn = false; // tracks the body.is-dark toggle
+
+    // ── Cursor repel ──
+    // Pointer position (client px == canvas px, the canvas is fixed full-screen).
+    // mActive stays false until the first move so the field rests on load.
+    let mx = -9999,
+      my = -9999,
+      mActive = false;
+    const repelR = 130, // influence radius (px)
+      repelF = 48; // max push (px)
 
     // ── Bridge state: Hello text → particles → techstack ──
     let introProgress = 0; // 0 = Hello text intact, 1 = fully gathered into techstack
@@ -234,39 +248,24 @@ export function useParticleField(refs: {
             : sections[sections.length - 1].shape;
       }
 
-      if (active === "techstack") {
-        const ts = SH.techstack,
-          sc = 0.9 + lp * 0.12;
-        for (let i = 0; i < N; i++) {
-          project(ts.x[i], ts.y[i], sc, 0, cx, cy, D, tmp);
-          TX[i] = tmp[0];
-          TY[i] = tmp[1];
+      const shp = SH[active];
+      if (shp) {
+        // Gentle scroll-linked scale + tilt so each shape feels alive as it
+        // crosses the viewport mid-line.
+        let scl = 1,
+          rot = 0;
+        if (active === "interface") {
+          scl = 0.9 + lp * 0.12;
+          rot = (lp - 0.5) * 0.1;
+        } else if (active === "frontend") {
+          scl = 0.86 + lp * 0.16;
+          rot = (lp - 0.5) * -0.16;
+        } else if (active === "backend") {
+          scl = 0.92 + lp * 0.1;
+          rot = (lp - 0.5) * 0.08;
         }
-      } else if (active === "creation") {
-        const one = SH.one,
-          three = SH.creation,
-          b = clamp(0, 1, lp);
         for (let i = 0; i < N; i++) {
-          const rx = one.x[i] + (three.x[i] - one.x[i]) * b;
-          const ry = one.y[i] + (three.y[i] - one.y[i]) * b;
-          project(rx, ry, 1, 0, cx, cy, D, tmp);
-          TX[i] = tmp[0];
-          TY[i] = tmp[1];
-        }
-      } else if (active === "growth") {
-        const g = SH.growth,
-          sc = 0.5 + lp * 0.95;
-        for (let i = 0; i < N; i++) {
-          project(g.x[i], g.y[i], sc, 0, cx, cy, D, tmp);
-          TX[i] = tmp[0];
-          TY[i] = tmp[1];
-        }
-      } else if (active === "modernization") {
-        const m = SH.modernization,
-          rot = -0.5 + lp * 1.0,
-          sc = 0.85 + lp * 0.15;
-        for (let i = 0; i < N; i++) {
-          project(m.x[i], m.y[i], sc, rot, cx, cy, D, tmp);
+          project(shp.x[i], shp.y[i], scl, rot, cx, cy, D, tmp);
           TX[i] = tmp[0];
           TY[i] = tmp[1];
         }
@@ -283,16 +282,50 @@ export function useParticleField(refs: {
 
       // ── Phase mix: techstack shape (Skills) → starfield (Projects) ──
       const entered = spanP > 0.0001;
-      const exitRamp = clamp(0, 1, (spanP - 0.88) / 0.12); // night lifts near the end
+      const exitRamp = clamp(0, 1, (spanP - 0.88) / 0.12); // gate closes near the end
       const base = entered ? 1 : enterP;
       const sc = base * base * (3 - 2 * base); // smoothstep — punchy burst
-      const dark = base * (1 - exitRamp); // night-sky opacity
+      // Sky + stars stay fully opaque through the exit; the gate clip-path
+      // (below) is what makes them recede, so they are NOT faded with exitRamp.
+      const dark = base; // night-sky opacity
       const bridgeIn = clamp(0, 1, (introProgress - 0.4) / 0.22);
-      const canvasOpacity = bridgeIn * (1 - exitRamp);
+      const canvasOpacity = bridgeIn;
 
-      // Drive the fixed night-sky layer + adaptive nav colour
-      if (skyEl) skyEl.style.opacity = dark.toFixed(3);
-      const wantDark = dark > 0.5;
+      // ── Gate close: clip the night sky + stars into a shrinking portrait
+      // doorway, then down to a point, as Projects ends — "stepping out of the
+      // gate". clip-path:none during the full-dark hold so the screen corners
+      // stay square (no stray rounded-white artifact).
+      let gateClip = "none";
+      if (exitRamp > 0.0001) {
+        const e = exitRamp;
+        // Stage A (0→0.7): full screen → centered portrait doorway, sized off
+        // viewport height so it reads tall+narrow on any aspect.
+        // Stage B (0.7→1): doorway collapses to a point at center.
+        const a = clamp(0, 1, e / 0.7);
+        const ea = a * a * (3 - 2 * a);
+        const b = clamp(0, 1, (e - 0.7) / 0.3);
+        const Hd = 0.62 * H,
+          Wd = 0.52 * Hd;
+        const curW = (W + (Wd - W) * ea) * (1 - b);
+        const curH = (H + (Hd - H) * ea) * (1 - b);
+        const insL = Math.max(0, ((W - curW) / 2 / W) * 100);
+        const insT = Math.max(0, ((H - curH) / 2 / H) * 100);
+        const r = 20 * clamp(0, 1, e / 0.12); // round in as the exit begins
+        gateClip = `inset(${insT.toFixed(2)}% ${insL.toFixed(2)}% round ${r.toFixed(1)}px)`;
+      }
+
+      // Drive the fixed night-sky layer + star canvas (opacity + gate clip)
+      if (skyEl) {
+        skyEl.style.opacity = dark.toFixed(3);
+        skyEl.style.clipPath = gateClip;
+      }
+      cv.style.clipPath = gateClip;
+      // Keep the Projects cards/statement contained inside the closing gate.
+      if (stageEl) stageEl.style.clipPath = gateClip;
+
+      // Nav lives in the corners, which clear to white first as the gate closes,
+      // so flip is-dark off early in the exit to keep the nav text legible.
+      const wantDark = base > 0.5 && exitRamp < 0.12;
       if (wantDark !== darkOn) {
         darkOn = wantDark;
         document.body.classList.toggle("is-dark", wantDark);
@@ -333,17 +366,43 @@ export function useParticleField(refs: {
         context.fillStyle = `rgb(${cr},${cg},${cb})`;
         cv.style.opacity = canvasOpacity.toFixed(3);
 
+        const repelR2 = repelR * repelR;
         for (let i = 0; i < N; i++) {
           // shape target (TX/TY) → scattered star target (SX/SY)
           const tx = TX[i] + (SX[i] - TX[i]) * sc;
           const ty = TY[i] + (SY[i] - TY[i]) * sc;
-          // shape shimmer fades out; a gentle star drift fades in
-          const jx = Math.cos(t * 0.9 + seed[i]) * 4.5 * (1 - sc);
-          const jy = Math.sin(t * 1.15 + seed[i] * 1.4) * 4.5 * (1 - sc);
+          const live = 1 - sc; // shape-state weight (0 once scattered)
+          // Layered organic churn in the shape state — two frequencies read as
+          // a living, breathing silhouette rather than a static one.
+          const jx =
+            (Math.cos(t * 0.9 + seed[i]) * 5.5 +
+              Math.sin(t * 1.7 + seed[i] * 2.3) * 3.2) *
+            live;
+          const jy =
+            (Math.sin(t * 1.15 + seed[i] * 1.4) * 5.5 +
+              Math.cos(t * 2.1 + seed[i] * 1.9) * 3.2) *
+            live;
+          // gentle star drift fades in once scattered
           const dx = Math.cos(t * 0.25 + sTw[i]) * 7 * sc;
           const dy = Math.sin(t * 0.21 + sTw[i] * 1.3) * 7 * sc;
-          px[i] += (tx + jx + dx - px[i]) * 0.09;
-          py[i] += (ty + jy + dy - py[i]) * 0.09;
+          // cursor repel — push the target out of the pointer's way; the lerp
+          // below eases particles aside and lets them close back behind it
+          let rx = 0,
+            ry = 0;
+          if (mActive) {
+            const ddx = px[i] - mx,
+              ddy = py[i] - my;
+            const d2 = ddx * ddx + ddy * ddy;
+            if (d2 < repelR2 && d2 > 0.01) {
+              const d = Math.sqrt(d2);
+              const f = 1 - d / repelR;
+              const push = f * f * repelF;
+              rx = (ddx / d) * push;
+              ry = (ddy / d) * push;
+            }
+          }
+          px[i] += (tx + jx + dx + rx - px[i]) * 0.11;
+          py[i] += (ty + jy + dy + ry - py[i]) * 0.11;
 
           // flat ink alpha in the shape; per-star twinkle once scattered
           const tw = sBright[i] * (0.55 + 0.45 * Math.sin(t * sTwSpd[i] + sTw[i]));
@@ -359,8 +418,15 @@ export function useParticleField(refs: {
       raf = requestAnimationFrame(frame);
     }
 
+    function onPointerMove(e: PointerEvent) {
+      mx = e.clientX;
+      my = e.clientY;
+      mActive = true;
+    }
+
     resize();
     window.addEventListener("resize", resize);
+    window.addEventListener("pointermove", onPointerMove);
     raf = requestAnimationFrame(frame);
 
     // Bridge driver — the Hello (#about) pin tail converts text → particles → techstack
@@ -417,12 +483,18 @@ export function useParticleField(refs: {
     return () => {
       cancelAnimationFrame(raf);
       window.removeEventListener("resize", resize);
+      window.removeEventListener("pointermove", onPointerMove);
       introTrigger.kill();
       burstTrigger.kill();
       spanTrigger.kill();
       clearBlocks();
       if (fadeEls.length) gsap.set(fadeEls, { clearProps: "opacity" });
-      if (skyEl) skyEl.style.opacity = "";
+      if (skyEl) {
+        skyEl.style.opacity = "";
+        skyEl.style.clipPath = "";
+      }
+      cv.style.clipPath = "";
+      if (stageEl) stageEl.style.clipPath = "";
       document.body.classList.remove("is-dark");
     };
   }, [canvasRef, capRef, skyRef, sectRefs]);

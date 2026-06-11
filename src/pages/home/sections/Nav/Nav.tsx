@@ -1,24 +1,43 @@
 import { useState, useRef } from "react";
+import { ScrollSmoother } from "gsap/ScrollSmoother";
 import { navLinks, profile } from "../../../../data/portfolio";
 import { useNavReveal } from "./useNavReveal";
+import { useMistNavigate } from "../../../../transition/MistTransition";
 
-export default function Nav() {
+export default function Nav({ linkBase = "" }: { linkBase?: string }) {
   const [open, setOpen] = useState(false);
-  const eyebrowRef = useRef<HTMLParagraphElement>(null);
+  const eyebrowRef = useRef<HTMLButtonElement>(null);
+  const navigate = useMistNavigate();
   useNavReveal(eyebrowRef);
+
+  // The eyebrow doubles as the "brand": on other routes it mist-navigates
+  // home; already home, it just glides back to the top.
+  const goHome = () => {
+    if (linkBase === "") {
+      const smoother = ScrollSmoother.get();
+      if (smoother) smoother.scrollTo(0, true);
+      else window.scrollTo({ top: 0 });
+    } else {
+      navigate("/");
+    }
+  };
 
   return (
     <>
-      {/* Eyebrow — fixed top-centre, hides on scroll down */}
-      <p
+      {/* Eyebrow / brand — fixed top-LEFT, hides on scroll down, returns home.
+          Explicit font: case.css restyles `body`, so the shared Nav must not
+          rely on inherited typography. */}
+      <button
         ref={eyebrowRef}
-        className="nav-eyebrow fixed z-[60] top-7 inset-x-0 text-center text-[11px] font-bold tracking-[0.18em] uppercase text-ink pointer-events-none select-none"
+        onClick={goHome}
+        aria-label="Back to home"
+        className="nav-eyebrow fixed z-[60] top-7 left-[clamp(24px,4vw,56px)] text-left text-[11px] font-bold tracking-[0.18em] uppercase text-ink [font-family:var(--font-sans)] cursor-pointer select-none"
       >
         {profile.role}
-      </p>
+      </button>
 
       {/* Menu link — fixed right edge, vertically centred */}
-      <div className="fixed z-[60] right-[clamp(24px,4vw,56px)] top-8 -translate-y-1/2">
+      <div className="fixed z-[60] right-[clamp(24px,4vw,56px)] top-8 -translate-y-1/2 [font-family:var(--font-sans)]">
         <button
           className="nav-menu-btn relative text-[13px] font-bold tracking-[0.12em] uppercase text-ink bg-transparent border-0 cursor-pointer"
           aria-label={open ? "Close menu" : "Open menu"}
@@ -51,7 +70,7 @@ export default function Nav() {
                 style={{ transitionDelay: open ? `${0.12 + i * 0.06}s` : "0s" }}
               >
                 <a
-                  href={href}
+                  href={`${linkBase}${href}`}
                   className="block py-2 text-sm font-medium tracking-[-0.02em] text-[#111] transition-[color,padding-left] duration-200 hover:text-[#ff3700] hover:pl-2"
                   onClick={() => setOpen(false)}
                 >
