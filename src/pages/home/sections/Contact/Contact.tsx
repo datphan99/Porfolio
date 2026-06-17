@@ -1,9 +1,5 @@
-import { useEffect, useRef, useState } from "react";
-import {
-  contactBudgets,
-  contactInterests,
-  profile,
-} from "../../../../data/portfolio";
+import { useRef, useState } from "react";
+import { contactOpportunityTypes, profile } from "../../../../data/portfolio";
 import { useContactReveal } from "./useContactReveal";
 import { useMagneticPills } from "./useMagneticPills";
 
@@ -26,28 +22,32 @@ export default function Contact() {
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [interest, setInterest] = useState("");
-  const [budget, setBudget] = useState("");
-  const [details, setDetails] = useState("");
+  const [opportunityType, setOpportunityType] = useState("");
+  const [company, setCompany] = useState("");
+  const [message, setMessage] = useState("");
   const [touched, setTouched] = useState(false);
-  const [status, setStatus] = useState<"idle" | "sent">("idle");
-
-  const timer = useRef<number | undefined>(undefined);
-  useEffect(() => () => window.clearTimeout(timer.current), []);
+  const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
 
   const nameError = touched && !name.trim();
   const emailError = touched && !email.trim();
 
-  const onSubmit = (e: React.FormEvent) => {
+  const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim() || !email.trim()) {
       setTouched(true);
       return;
     }
-    // Visual-only: static site has no backend — confirm, then reset the label.
-    setStatus("sent");
-    window.clearTimeout(timer.current);
-    timer.current = window.setTimeout(() => setStatus("idle"), 4000);
+    setStatus("sending");
+    try {
+      const res = await fetch("/api/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, opportunityType, company, message }),
+      });
+      setStatus(res.ok ? "sent" : "error");
+    } catch {
+      setStatus("error");
+    }
   };
 
   return (
@@ -69,13 +69,6 @@ export default function Contact() {
       <div className="container relative z-[1] grid gap-x-16 gap-y-14 md:grid-cols-2 md:items-center">
         {/* ── Left: statement ─────────────────────────── */}
         <div>
-          <p
-            data-reveal
-            className="text-[12px] font-semibold tracking-[0.22em] uppercase text-white/45 mb-7"
-          >
-            ( Contact )
-          </p>
-          {/* Staggered three-line headline, indented like the reference */}
           <h2
             data-reveal
             className="font-display font-semibold uppercase tracking-[-0.03em] leading-[0.9] text-[clamp(38px,6.4vw,88px)] text-white"
@@ -83,14 +76,13 @@ export default function Contact() {
             <span className="block">Let's start</span>
             <span className="block pl-[16%] md:pl-[26%]">creating</span>
             <span className="block pl-[6%] md:pl-[10%]">
-              {/* accent matches the footer's dither blue — the two sections
-                  share one accent as they blend into each other */}
+              {/* accent matches the footer's dither blue */}
               <em className="not-italic text-accent">together</em>
             </span>
           </h2>
           <div data-reveal className="mt-12">
             <p className="text-[12px] font-medium tracking-[0.14em] uppercase text-white/45 mb-2">
-              Say hi
+              Contact
             </p>
             <a
               href={`mailto:${profile.email}`}
@@ -109,12 +101,12 @@ export default function Contact() {
         >
           <div data-reveal>
             <p className="text-[13px] font-medium text-white/45 mb-3">
-              Your Data
+              Your info
             </p>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <input
                 aria-label="Name"
-                placeholder="Name*"
+                placeholder="Name *"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 className={fieldCls(nameError)}
@@ -122,7 +114,7 @@ export default function Contact() {
               <input
                 aria-label="Email"
                 type="email"
-                placeholder="Email*"
+                placeholder="Email *"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className={fieldCls(emailError)}
@@ -132,19 +124,19 @@ export default function Contact() {
 
           <div data-reveal className="mt-7">
             <p className="text-[13px] font-medium text-white/45 mb-3">
-              You are interested in
+              Opportunity type
             </p>
             <div className="flex flex-wrap gap-2.5">
-              {contactInterests.map((opt) => (
+              {contactOpportunityTypes.map((opt) => (
                 <button
                   key={opt}
                   type="button"
                   data-magnetic
-                  aria-pressed={interest === opt}
+                  aria-pressed={opportunityType === opt}
                   onClick={() =>
-                    setInterest((prev) => (prev === opt ? "" : opt))
+                    setOpportunityType((prev) => (prev === opt ? "" : opt))
                   }
-                  className={pillCls(interest === opt)}
+                  className={pillCls(opportunityType === opt)}
                 >
                   {opt}
                 </button>
@@ -153,32 +145,22 @@ export default function Contact() {
           </div>
 
           <div data-reveal className="mt-7">
-            <p className="text-[13px] font-medium text-white/45 mb-3">
-              Budget in USD
-            </p>
-            <div className="flex flex-wrap gap-2.5">
-              {contactBudgets.map((opt) => (
-                <button
-                  key={opt}
-                  type="button"
-                  data-magnetic
-                  aria-pressed={budget === opt}
-                  onClick={() => setBudget((prev) => (prev === opt ? "" : opt))}
-                  className={pillCls(budget === opt)}
-                >
-                  {opt}
-                </button>
-              ))}
-            </div>
+            <input
+              aria-label="Company or organisation"
+              placeholder="Company / Organisation"
+              value={company}
+              onChange={(e) => setCompany(e.target.value)}
+              className={fieldCls(false)}
+            />
           </div>
 
-          <div data-reveal className="mt-7">
+          <div data-reveal className="mt-4">
             <textarea
-              aria-label="Project details"
-              placeholder="Project details"
-              value={details}
-              onChange={(e) => setDetails(e.target.value)}
-              rows={2}
+              aria-label="Message"
+              placeholder="Tell me about the role or opportunity..."
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              rows={3}
               className={`${fieldCls(false)} resize-none`}
             />
           </div>
@@ -186,10 +168,13 @@ export default function Contact() {
           <div data-reveal className="mt-4">
             <button
               type="submit"
-              disabled={status === "sent"}
-              className="w-full rounded-full bg-white py-4 text-[15px] font-medium text-[#15161a] transition-opacity duration-200 hover:opacity-90 disabled:opacity-100"
+              disabled={status === "sending" || status === "sent"}
+              className="w-full rounded-full bg-white py-4 text-[15px] font-medium text-[#15161a] transition-opacity duration-200 hover:opacity-90 disabled:opacity-75"
             >
-              {status === "sent" ? "Message sent ✓" : "Submit Message"}
+              {status === "sending" && "Sending…"}
+              {status === "sent" && "Message sent ✓"}
+              {status === "error" && "Something went wrong — try again"}
+              {status === "idle" && "Send Message"}
             </button>
           </div>
         </form>

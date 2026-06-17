@@ -1,0 +1,25 @@
+[
+  {
+    "id": 1,
+    "name": "Fund",
+    "role": "Fullstack Developer",
+    "imageUrl": "https://placehold.co/1200x800/c9c5bc/15161a?text=Atlas",
+    "videoUrl": null,
+    "detailUrl": "#",
+    "tags": "Product Design",
+    "year": "2025",
+    "caseStudyId": 1,
+    "dashboard": true
+  },
+  {
+    "id": 2,
+    "name": "More to come",
+    "role": "The journey continues",
+    "imageUrl": "",
+    "videoUrl": null,
+    "detailUrl": "#",
+    "tags": "",
+    "year": "",
+    "placeholder": true
+  }
+]

@@ -3,6 +3,7 @@ import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { readFileSync } from "node:fs";
 import RootLayout from "./RootLayout";
 import HomePage from "./pages/home/HomePage";
+import { profile } from "./data/portfolio";
 
 test("renders the portfolio shell", () => {
   // Render through RootLayout: the Nav lives there now (persists across routes).
@@ -27,7 +28,7 @@ test("renders the portfolio shell", () => {
   expect(within(footer).getByText("Fonts used")).toBeInTheDocument();
   expect(
     within(footer).getByRole("link", { name: "Email" }),
-  ).toHaveAttribute("href", "mailto:hello@example.com");
+  ).toHaveAttribute("href", `mailto:${profile.email}`);
   expect(
     within(footer).getByRole("navigation", { name: /footer/i }),
   ).toBeInTheDocument();

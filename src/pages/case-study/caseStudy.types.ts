@@ -51,12 +51,25 @@ export interface CaseStudyOutcome {
   cells: { num: string; suffix?: string; desc: string }[];
 }
 
+export interface CaseStudyProblem {
+  num: string;
+  label: string;
+  text: string;
+}
+
+export interface CaseStudyProblems {
+  label: string;
+  title: RichText;
+  items: CaseStudyProblem[];
+}
+
 export interface CaseStudy {
   title: string;
   nav: CaseStudyNav;
   hero: CaseStudyHero;
   meta: CaseStudyMetaCell[];
   overview: CaseStudyOverview;
+  problems?: CaseStudyProblems;
   statement: RichText;
   work: CaseStudyWork;
   outcome: CaseStudyOutcome;

@@ -1,7 +1,7 @@
 {
   "title": "Fund Portal — Case Study",
   "nav": {
-    "brand": "Studio",
+    "brand": "Fund Portal",
     "links": [
       { "href": "#overview", "label": "Overview" },
       { "href": "#work", "label": "Motion" },
@@ -10,23 +10,23 @@
     ]
   },
   "hero": {
-    "kicker": "Case study — Fintech platform",
+    "kicker": "Case study — Internal redesign · Fintech",
     "mark": { "line1": "Fund", "line2": "Portal" },
     "headline": [
-      "Designing ",
-      { "it": "trust" },
-      " into everyday fund operations."
+      "Making complex ",
+      { "it": "fund operations" },
+      " feel effortless."
     ],
     "body": [
-      "Fund administration still runs on spreadsheets, email approvals and systems that assume you already know how they work. For an asset manager moving billions across multiple open-ended funds, that friction is risk.",
-      "Northcrest Capital needed an operations portal where every subscription, redemption and NAV update could be reviewed, approved and audited — without operators having to become experts in the software first.",
-      "Our studio partnered from the ground up: information architecture, a calm Apple-grade design system, and a maker–checker workflow that makes the right action the obvious one."
+      "This is an internal project — a full redesign of an existing platform. Due to NDA obligations, all figures, fund names, and user data shown are illustrative mock data only.",
+      "The original Fund Portal worked, but barely felt like it. No design system, inconsistent components, a visual language borrowed from five different eras — operators learned to live with the friction rather than expect better.",
+      "The redesign started from zero: a new component library built in React, a proper token-driven design system, and a clear information hierarchy that lets users see the state of every order, fund, and position at a glance."
     ]
   },
   "meta": [
-    { "label": "Role", "value": "Designer · Fullstack Developer" },
-    { "label": "Year", "value": "2026" },
-    { "label": "Techstack", "value": "React.js and Nest.js" },
+    { "label": "Role", "value": "Designer · Developer" },
+    { "label": "Year", "value": "2025" },
+    { "label": "Techstack", "value": "React.js" },
     { "label": "Platform", "value": " Web " }
   ],
   "overview": {
@@ -34,56 +34,82 @@
     "blocks": [
       {
         "label": "Challenge",
-        "text": "Translate a dense, compliance-heavy back office into an interface that feels effortless — fast to scan, impossible to misread, and safe to act in."
+        "text": "An internal tool that had grown organically — no shared style, no consistent components, hard to scan and slow to act in. The team deserved an interface that matched the complexity of the work they were doing."
       },
       {
         "label": "Solution",
-        "text": "A single-accent, photography-quiet system built on a strict type and spacing scale. Maker–checker is wired into every state, so approvals stay deliberate and fully logged."
+        "text": "A ground-up redesign: design tokens for every visual decision, a component library that enforces consistency by default, and an information architecture that puts the right data one click away."
       },
       {
         "label": "Results",
-        "text": "A cohesive portal spanning orders, funds, transactions, assets and access control — shipping with one design language that scales as the book grows."
+        "text": "A modern, cohesive portal covering order matching, fund monitoring, transactions, and portfolio analytics — one design language across every surface, built entirely in React."
       }
     ],
     "tech": {
-      "heading": ["Under the hood — what we built."],
+      "heading": ["Under the hood — what I built."],
       "cells": [
         {
           "icon": "architecture",
-          "label": "Architecture",
-          "text": "A React component library with token-driven theming and modular, per-surface screens — one shell, many routes, zero duplicated UI."
+          "label": "Component architecture",
+          "text": "A React component library structured around feature surfaces — shared primitives, per-route compositions, zero duplicated markup."
         },
         {
           "icon": "designSystem",
           "label": "Design system",
-          "text": "88 design tokens governing color, a 300/400/600/700 type ladder, spacing, radius and a single elevation. No ad-hoc values anywhere."
+          "text": "Token-driven from the ground up: color, typography scale, spacing, radius, and elevation — every value named, nothing hardcoded."
         },
         {
           "icon": "makerChecker",
-          "label": "Maker–checker",
-          "text": "Every mutation flows pending → approved / rejected. Each decision is stamped with the operator's ID and surfaced in an audit-ready trail."
+          "label": "Order matching",
+          "text": "Buy and sell orders are surfaced with clear status indicators — pending, matched, cancelled — so operators can act without digging for context."
         },
         {
           "icon": "dataViz",
-          "label": "Data visualisation",
-          "text": "NAV index, allocation donut and subscription-flow charts all render from a single charting primitive, so every graph shares the same visual grammar."
+          "label": "Portfolio analytics",
+          "text": "Holdings, allocation, and performance rendered through a single charting primitive — consistent visual grammar across every analytics view."
         },
         {
           "icon": "accessControl",
-          "label": "Access control",
-          "text": "Role-based permissions throughout; read-only states degrade gracefully for non-checkers instead of hiding context."
+          "label": "Fund monitoring",
+          "text": "Live fund status, NAV, and AUM in a single scannable layout — designed for operators who need to assess many funds at a glance."
         },
         {
           "icon": "importExport",
-          "label": "Import / export",
-          "text": "VSD import reconciliation and an admin export history give operations a paper trail for every file that enters or leaves the portal."
+          "label": "Transaction history",
+          "text": "A filterable, sortable transaction log with enough context per row that most questions get answered without opening a detail view."
         }
       ]
     }
   },
+  "problems": {
+    "label": "What wasn't working",
+    "title": ["The problems", { "it": " I inherited." }],
+    "items": [
+      {
+        "num": "01",
+        "label": "Inconsistent components",
+        "text": "Buttons, inputs and table styles were re-implemented independently on every screen. The same element looked and behaved differently depending on which page you were on — no single source of truth."
+      },
+      {
+        "num": "02",
+        "label": "No design system",
+        "text": "Every colour, spacing value and font size was hardcoded ad-hoc per screen. Making a global visual change meant hunting down dozens of scattered overrides with no guarantee of completeness."
+      },
+      {
+        "num": "03",
+        "label": "Dense, hard-to-scan data",
+        "text": "Fund data, orders and transactions were raw tables with no visual hierarchy. Operators had to read every row to locate what they needed — a slow, error-prone ritual at the start of every work session."
+      },
+      {
+        "num": "04",
+        "label": "Outdated visual language",
+        "text": "The interface felt like a 2015 admin panel: no breathing room, no type hierarchy, no visual cues to guide attention. It communicated low confidence in a context where trust is everything."
+      }
+    ]
+  },
   "statement": [
-    "Operations move faster when the interface ",
-    { "it": "gets out of the way." }
+    "Good internal tools ",
+    { "it": "respect the people who use them." }
   ],
   "work": {
     "label": "Motion & interaction",
@@ -96,33 +122,33 @@
       {
         "idx": "01",
         "name": "Orders",
-        "desc": "Maker–checker approvals — review a pending order and clear it in a single motion, with every decision logged.",
-        "tag": "Approval flow",
-        "url": "portal.northcrest.capital/orders",
+        "desc": "Order matching at a glance — review pending buy and sell orders, check matched status, and act without context-switching.",
+        "tag": "Order flow",
+        "url": "fund-portal.app/orders",
         "src": "anim-orders.html"
       },
       {
         "idx": "02",
         "name": "Funds",
-        "desc": "Funds at a glance — live NAV, AUM and status across every open-ended fund under management.",
+        "desc": "Fund overview — live NAV, AUM and fund status across every instrument under management, scannable in seconds.",
         "tag": "Overview",
-        "url": "portal.northcrest.capital/funds",
+        "url": "fund-portal.app/funds",
         "src": "anim-funds.html"
       },
       {
         "idx": "03",
         "name": "Transactions",
-        "desc": "Rule configuration — subscription, redemption and fee-tier rules with a read-only fund summary alongside.",
-        "tag": "Configuration",
-        "url": "portal.northcrest.capital/transactions",
+        "desc": "Transaction history — a full, filterable log of every subscription, redemption and transfer with inline status and amounts.",
+        "tag": "History",
+        "url": "fund-portal.app/transactions",
         "src": "anim-transactions.html"
       },
       {
         "idx": "04",
         "name": "Assets",
-        "desc": "Portfolio analytics — aggregate NAV, top holdings and sector allocation, composed from one chart primitive.",
+        "desc": "Portfolio analytics — aggregate holdings, sector allocation and performance composed from one shared chart primitive.",
         "tag": "Analytics",
-        "url": "portal.northcrest.capital/assets",
+        "url": "fund-portal.app/assets",
         "src": "anim-assets.html"
       }
     ]
@@ -131,17 +157,17 @@
     "label": "Outcome",
     "cells": [
       {
-        "num": "9",
-        "desc": "operational surfaces designed & built on one system"
+        "num": "12",
+        "desc": "screens redesigned under one unified system"
       },
       {
         "num": "1",
-        "desc": "unified design language — 88 tokens, zero ad-hoc values"
+        "desc": "design language — tokens, components, zero ad-hoc values"
       },
       {
         "num": "100",
         "suffix": "%",
-        "desc": "of actions captured under maker–checker audit"
+        "desc": "of the old UI replaced with the new component library"
       }
     ]
   },
@@ -151,7 +177,7 @@
     "href": "mailto:hello@studio.com"
   },
   "footer": {
-    "left": "Fund Portal — case study · Northcrest Capital",
-    "right": "Mock data, NDA-safe · © 2026"
+    "left": "Fund Portal — case study · Internal redesign",
+    "right": "Mock data, NDA-protected · © 2025"
   }
 }

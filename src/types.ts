@@ -11,28 +11,6 @@ export interface NavLink {
   label: string;
 }
 
-export interface ShowcaseItem {
-  id: number;
-  alt: string;
-  tag: string | null;
-}
-
-export interface HelloPill {
-  id: string;
-  label: string;
-  icon: string;
-  color: string;
-  side: "left" | "right";
-}
-
-export interface Skill {
-  id: number;
-  tag: string;
-  name: string;
-  description: string;
-  items: string[];
-}
-
 export interface CareerEntry {
   role: string;
   company: string;

@@ -1,0 +1,20 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Environment variables — never commit these
+.env
+.env.local
+.env.*.local
+
+# Vite
+.vite/
+
+# Misc
+.DS_Store
+*.local
+
+# Superpowers brainstorm sessions
+.superpowers/

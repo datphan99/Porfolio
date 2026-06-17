@@ -1,11 +1,8 @@
 import { useRef } from "react";
-import sectionsData from "../../../../data/particleSections.json";
-import type { ParticleSection } from "../../../../types";
+import { particleSections as sections } from "../../../../data/portfolio";
 import { useHomeStage } from "../../HomeStageContext";
 import { useParticleField } from "./useParticleField";
 import MobileSection from "./MobileSection";
-
-const sections = sectionsData as ParticleSection[];
 
 export default function Skills() {
   const sectionRef = useRef<HTMLElement>(null);

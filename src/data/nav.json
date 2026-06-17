@@ -1,0 +1,7 @@
+[
+  { "href": "#about", "label": "Process" },
+  { "href": "#work", "label": "Portfolio" },
+  { "href": "#skills", "label": "Skills" },
+  { "href": "#career", "label": "Experience" },
+  { "href": "#contact", "label": "Contact" }
+]

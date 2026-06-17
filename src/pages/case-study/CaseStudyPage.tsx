@@ -13,6 +13,7 @@ import { useCaseStudyMotion } from "./useCaseStudyMotion";
 import CaseHero from "./sections/CaseHero";
 import CaseMeta from "./sections/CaseMeta";
 import CaseOverview from "./sections/CaseOverview";
+import CaseProblems from "./sections/CaseProblems";
 import CaseStatement from "./sections/CaseStatement";
 import CaseReels from "./sections/CaseReels";
 import CaseOutcome from "./sections/CaseOutcome";
@@ -125,6 +126,7 @@ export default function CaseStudyPage() {
           <CaseHero hero={data.hero} />
           <CaseMeta meta={data.meta} />
           <CaseOverview overview={data.overview} />
+          {data.problems && <CaseProblems problems={data.problems} />}
           <CaseStatement statement={data.statement} />
           <CaseReels work={data.work} basePath={basePath} />
           <CaseOutcome outcome={data.outcome} />

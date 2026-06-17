@@ -29,8 +29,8 @@ This is a React + TypeScript portfolio built with Vite, with two routes behind a
 - **`src/pages/case-study/`** — JSON-driven case-study page (`CaseStudyPage.tsx` fetches `/case-studies/case-study-{id}/case.json`, injects route-scoped `case.css`, renders `sections/`; `useCaseStudyMotion.ts` owns its ScrollSmoother + scroll choreography). Content lives in self-contained `public/case-studies/case-study-{n}/` folders; reels are iframes.
 - **`src/pages/home/sections/<Name>/`** — each animated section is a folder: `<Name>.tsx` (UI / render) + one or more `use<Name>...` hooks (animation logic). Shared sub-components sit beside them (`Projects/ProjectCard.tsx`, `Skills/MobileSection.tsx`). Extracted constants live in helper modules (`Hero/heroShaders.ts`, `Skills/particles.ts`). Sections: `Nav`, `Hero`, `Hello`, `Skills`, `Projects`, `Career`.
 - **`src/pages/home/useSmoothScroller.ts`** — `ScrollSmoother.create(...)` init + cleanup, called from `HomePage`.
-- **`src/data/portfolio.ts`** — the only content to edit: `profile`, `navLinks`, `showcaseItems`, `helloPills`, `skills`, `careerEntries`, `projects` exports.
-- **`src/types.ts`** — shared TypeScript interfaces for all data shapes and props.
+- **`src/data/`** — all site content, one JSON file per section: `profile.json`, `nav.json`, `projects.json`, `career.json`, `contact.json`, `skills.json` (particle sections). Edit these to change copy — no TypeScript needed. **`src/data/portfolio.ts`** is a typed barrel: it imports each JSON and re-exports it with the proper type from `types.ts`, so consumers get full type-safety while content stays in plain JSON. Import content from `data/portfolio` (the barrel), not the raw JSON. To scale: add a project → edit `projects.json`; add a new data set → add `<name>.json` + one typed re-export line in `portfolio.ts`.
+- **`src/types.ts`** — shared TypeScript interfaces for all data shapes and props (`Profile`, `NavLink`, `CareerEntry`, `Project`, `ParticleSection`).
 - **`src/styles.css`** — all CSS. Design tokens are CSS variables on `:root` (`--dot: #ff3700`, `--radius: 22px`).
 
 ### Hook/UI split convention

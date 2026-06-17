@@ -2,11 +2,8 @@ import { useEffect, type RefObject } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { ScrollSmoother } from "gsap/ScrollSmoother";
-import sectionsData from "../../../../data/particleSections.json";
-import type { ParticleSection } from "../../../../types";
+import { particleSections as sections } from "../../../../data/portfolio";
 import { LABELS, SHAPE_KEYS, SVGS, sample, shuffle, toN } from "./particles";
-
-const sections = sectionsData as ParticleSection[];
 
 export function useParticleField(refs: {
   canvasRef: RefObject<HTMLCanvasElement | null>;

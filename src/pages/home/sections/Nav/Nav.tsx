@@ -72,7 +72,14 @@ export default function Nav({ linkBase = "" }: { linkBase?: string }) {
                 <a
                   href={`${linkBase}${href}`}
                   className="block py-2 text-sm font-medium tracking-[-0.02em] text-[#111] transition-[color,padding-left] duration-200 hover:text-[#ff3700] hover:pl-2"
-                  onClick={() => setOpen(false)}
+                  onClick={(e) => {
+                    setOpen(false);
+                    if (linkBase !== "") return;
+                    e.preventDefault();
+                    const smoother = ScrollSmoother.get();
+                    if (smoother) smoother.scrollTo(href, true);
+                    else document.querySelector(href)?.scrollIntoView({ behavior: "smooth" });
+                  }}
                 >
                   {label}
                 </a>
